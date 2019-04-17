@@ -2,9 +2,9 @@
 #define ROW2 BIT5
 #define ROW3 BIT6
 #define ROW4 BIT7
-#define ROW5 BIT5
-#define ROW6 BIT6
-#define ROW7 BIT7
+#define COL1 BIT5
+#define COL2 BIT6
+#define COL3 BIT7
 
 // initialize the MSP432 GPIO pins to appropriate rows and columns
 static void keypadinit (void) {
@@ -21,9 +21,7 @@ static void keypadinit (void) {
 
 // read a button press
 static uint8_t get_key (void) {
-  /* DAD: do we need this??
-  *int col;
-  int rows;*/
+  int col;
   P3->OUT |= (COL1 | COL2 | COL3);
   _delay_cycles(25);
   rows = P6->IN & (ROW1 | ROW2 | ROW3 | ROW4);
