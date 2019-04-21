@@ -104,6 +104,7 @@ void lcd_backspace(void)
     Write_string_LCD(" ");
     lcd_command(0x16); // cursor shift right
 }
+
 // clear the display
 void Clear_LCD(void)
 {
