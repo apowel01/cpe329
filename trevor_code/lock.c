@@ -21,7 +21,7 @@ int lock_get_digit()
 
     return digit;
 }
-void lock_get_pin(void)
+uint8_t lock_get_pin(void)
 {
 //    uint8_t pin_valid;
     int number;
@@ -33,7 +33,8 @@ void lock_get_pin(void)
     key_str = 0x30 + number; // convert to ascii
     Write_char_LCD(key_str);
     if (KEYPAD_STAR == number) {
-        // abort
+        lcd_backspace();
+        return 0;
     }
     pin_attempt = 1000 * number;
     // if * return, else read and display keypress
@@ -41,7 +42,9 @@ void lock_get_pin(void)
     key_str = 0x30 + number; // convert to ascii
     Write_char_LCD(key_str);
     if (KEYPAD_STAR == number) {
-        // abort
+        lcd_backspace();
+        lcd_backspace();
+        return 0;
     }
     pin_attempt += 100 * number;
     // if * return, else read and display keypress
@@ -49,7 +52,10 @@ void lock_get_pin(void)
     key_str = 0x30 + number; // convert to ascii
     Write_char_LCD(key_str);
     if (KEYPAD_STAR == number) {
-        // abort
+        lcd_backspace();
+        lcd_backspace();
+        lcd_backspace();
+        return 0;
     }
     pin_attempt |= 10 * number;
     // if * return, else read and display keypress
@@ -57,19 +63,25 @@ void lock_get_pin(void)
     key_str = 0x30 + number; // convert to ascii
     Write_char_LCD(key_str);
     if (KEYPAD_STAR == number) {
-        // abort
+        lcd_backspace();
+        lcd_backspace();
+        lcd_backspace();
+        lcd_backspace();
+        return 0;
     }
     pin_attempt += number;
 
+    return 1;
 }
 void lock_locked(void)
 {
-
+    Write_string_LCD("Hello World");
+    lock_get_pin();
 }
 
 void lock_test(void)
 {
-    lock_get_pin();
+    lock_locked();
 
     // read first number
 

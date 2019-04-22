@@ -2,6 +2,7 @@
 #include "LCD.h"
 #include "keypad.h"
 #include "delay.h"
+#include "lock.h"
 
 /**
  * main.c
@@ -29,6 +30,6 @@ void main(void)
         _delay_cycles(25000);
     }
 #else
-    delay_test();
+    lock_test();
 #endif
 }

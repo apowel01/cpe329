@@ -100,9 +100,12 @@ void lcd_position_set(uint8_t position)
 
 void lcd_backspace(void)
 {
-    lcd_command(14); // cursor shift left
+    lcd_command(12); // cursor shift left
+    delay_ms(10);
     Write_string_LCD(" ");
+    delay_ms(10);
     lcd_command(0x16); // cursor shift right
+    delay_ms(10);
 }
 
 // clear the display

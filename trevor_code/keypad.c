@@ -153,6 +153,9 @@ int keypad_get_digit()
     else if (key == 10) {
         number = KEYPAD_STAR;
     }
+    else {
+        number = key;
+    }
 
     return number;
 }
