@@ -8,7 +8,7 @@
 #ifndef LOCK_H_
 #define LOCK_H_
 
-void lock_test(void);
+void lock_main(void);
 
 
 

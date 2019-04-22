@@ -16,6 +16,6 @@ void keypadinit (void);
 char keypad_getkey(void);
 char keypad_get_ascii(void);
 int keypad_get_number(uint8_t digits);
-int keypad_get_digit();
+int keypad_get_digit(void);
 
 #endif /* KEYPAD_H_ */

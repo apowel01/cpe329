@@ -64,3 +64,9 @@ void led_2_blue_off(void)
 {
     P2->OUT &= ~BIT2;
 }
+
+void led_2_off(void)
+{
+    P2->OUT &= ~(BIT0 | BIT1 | BIT2);
+}
+

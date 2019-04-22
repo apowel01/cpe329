@@ -67,7 +67,7 @@ void Write_char_LCD(unsigned char data)
     P2->OUT |= LCD_RS;
     P2->OUT &= ~LCD_RW;
     P2->OUT &= ~LCD_EN;
-    P2->OUT &= 0xF0; // forcing a clear of bottom 4 pins
+ //   P2->OUT &= 0xF0; // forcing a clear of bottom 4 pins
 
     // upper 4 bits character
     P4->OUT &= 0xF0; // forcing bits clear
@@ -139,7 +139,7 @@ void Write_number_LCD(int value)
         while (1) {
             next_digit = value;
             digits = 0;
-            while (next_digit > 10) {
+            while (next_digit > 9) {
                 next_digit /= 10;
                 digits++;
             }

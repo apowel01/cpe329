@@ -30,6 +30,6 @@ void main(void)
         _delay_cycles(25000);
     }
 #else
-    lock_test();
+    lock_main();
 #endif
 }
