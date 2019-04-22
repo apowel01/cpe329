@@ -76,7 +76,7 @@ void lock_locked(void)
     // put message on display
     Write_string_LCD("LOCKED");
     lcd_position_set(0x40);
-    Write_string_LCD("Enter Pin: ");
+    Write_string_LCD("ENTER KEY ");
 }
 
 void lock_init()
@@ -96,6 +96,7 @@ void lock_unlocked(void)
     // set LED 2 green
     led_2_off();
     led_2_green_on();
+
     // reset the failure penalty
     pin_fail_penalty = 0;
     delay_sec(UNLOCK_TIME);
@@ -119,14 +120,39 @@ void lock_frozen(void)
     delay_sec(pin_fail_penalty);
 }
 
-void lock_relock(void)
+void lock_new_pin(void)
 {
+    int pin_new = 0;
+
     Clear_LCD();
     Home_LCD();
+    Write_string_LCD("NEW PIN: ");
+    while (0 == pin_new) {
+        pin_new = lock_get_pin();
+    }
+
+    stored_pin = pin_new;
+}
+
+void lock_relock(void)
+{
+    int digit;
+    Clear_LCD();
+    Home_LCD();
+#if 1
+    Write_string_LCD("PRESS ANY KEY");
+    lcd_position_set(0x40);
+    Write_string_LCD("TO LOCK");
+    digit = keypad_get_digit();
+    if (KEYPAD_HASH == digit) {
+        lock_new_pin();
+    }
+#else
     Write_string_LCD("RELOCK IN ");
     Write_number_LCD(RELOCK_WARNING_TIME);
     Write_string_LCD("s");
     delay_sec(RELOCK_WARNING_TIME);
+#endif
 }
 
 void lock_main(void)
