@@ -105,25 +105,30 @@ char keypad_get_ascii(void)
 
     return key_str;
 }
-int keypad_get_number(uint8_t digits)
+
+int keypad_get_digit()
 {
     int number = 0;
     uint8_t key;
 
-    while(digits > 0) {
+    while(1) {
         key = get_key();
         if (key == KEYPAD_NOTPRESSED) {
             delay_ms(50);
             continue;
         }
-        if (key == 11) {
-            key = 0;
+        else {
+            break;
         }
-        if (key <= 9) {
-            number *= 10;
-            number += key;
-            digits--;
-        }
+    }
+    if (key == 11) {
+        number = 0;
+    }
+    else if (key = 12) {
+        number = KEYPAD_HASH;
+    }
+    else if (key = 10) {
+        number = KEYPAD_STAR;
     }
 
     return number;

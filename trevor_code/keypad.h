@@ -9,10 +9,13 @@
 #define KEYPAD_H_
 
 #define KEYPAD_NOTPRESSED 0xFF
+#define KEYPAD_STAR (-6)
+#define KEYPAD_HASH (-13)
 
 void keypadinit (void);
 char keypad_getkey(void);
 char keypad_get_ascii(void);
 int keypad_get_number(uint8_t digits);
+int keypad_get_digit();
 
 #endif /* KEYPAD_H_ */
