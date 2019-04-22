@@ -5,6 +5,11 @@
  *      Author: trevo
  */
 
+#include "msp.h"
+#include "keypad.h"
+#include "LCD.h"
+#include "delay.h"
+
 // special case, we need to ignore the HASH symbol
 int lock_get_digit()
 {
@@ -14,10 +19,11 @@ int lock_get_digit()
         digit = keypad_get_digit();
     }
 
+    return digit;
 }
 void lock_get_pin(void)
 {
-    uint8_t pin_valid;
+//    uint8_t pin_valid;
     int number;
     char key_str;
     int pin_attempt = 0;
@@ -59,10 +65,6 @@ void lock_get_pin(void)
 void lock_locked(void)
 {
 
-
-        // read the PIN
-        pin_valid = lock_get_pin();
-        (void)pin_valid;
 }
 
 void lock_test(void)

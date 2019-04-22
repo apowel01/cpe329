@@ -105,6 +105,29 @@ char keypad_get_ascii(void)
 
     return key_str;
 }
+int keypad_get_number(uint8_t digits)
+{
+    int number = 0;
+    uint8_t key;
+
+    while(digits > 0) {
+        key = get_key();
+        if (key == KEYPAD_NOTPRESSED) {
+            delay_ms(50);
+            continue;
+        }
+        if (key == 10) {
+            key = 0;
+        }
+        if (key <= 9) {
+            number *= 10;
+            number += key;
+            digits--;
+        }
+    }
+
+    return number;
+}
 
 int keypad_get_digit()
 {
@@ -124,10 +147,10 @@ int keypad_get_digit()
     if (key == 11) {
         number = 0;
     }
-    else if (key = 12) {
+    else if (key == 12) {
         number = KEYPAD_HASH;
     }
-    else if (key = 10) {
+    else if (key == 10) {
         number = KEYPAD_STAR;
     }
 
