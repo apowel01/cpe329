@@ -22,5 +22,6 @@ void delay_ms(int ms);
 void delay_sec(int sec);
 
 void delay_test(void);
+void delay_set_dco(int freq);
 
 #endif /* DELAY_H_ */

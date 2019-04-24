@@ -30,6 +30,7 @@ void main(void)
         _delay_cycles(25000);
     }
 #else
-    lock_main();
+    timer_a_init();
+//    lock_main();
 #endif
 }
