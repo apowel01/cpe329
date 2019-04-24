@@ -11,6 +11,8 @@
 
 void TA0_0_IRQHandler(void)
 {
+    // make sure the GPIOs are triggered at the same point in the 2 ISRs,
+    // that will minimize any skew caused by instruction processing time
     led_1_on();
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
 }
@@ -33,8 +35,10 @@ void timer_a_init(void)
     TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
                                             // to use SMCLK in UP mode
     // set CCR0 to 25KHz and use reset mode
+    // 25KHz is a 40uS period, a 24MHz clock does 24 ticks per uS
+    // so the period is 24*40 = 960 clock ticks
     TIMER_A0->CCR[0] = 960;
-    // set CCR1 to give us a 25% duty cycle
+    // set CCR1 to give us a 25% duty cycle - 240 ticks
     TIMER_A0->CCR[1] = 240;
 
 //    TIMER_A0->CCR[0] = 16339; // 32.678 kHz from ACLK = 32678/2 Hz
