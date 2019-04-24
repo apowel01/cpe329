@@ -63,6 +63,9 @@ int lock_get_pin(void)
     }
     pin_attempt += digit;
 
+    // add a delay to allow the last number to be seen
+    delay_sec(1)
+
     return pin_attempt;
 }
 void lock_locked(void)
