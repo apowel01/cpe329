@@ -165,7 +165,7 @@ void PORT1_IRQHandler(void)
         // we want the difference between current counter and the button 1 "start_value"
         delta = game_ms_counter - start_value;
         (void)delta;
-        Write_number_LCD(400);
+        Write_number_LCD(delta);
         Write_string_LCD("mS");
         P1->IFG &= ~BIT4; // clear flag
     }
@@ -301,8 +301,6 @@ void timer_a_init(void)
     NVIC->ISER[1] = 1 << (PORT1_IRQn & 31); // enable GPIO interrupts in NVIC
     Clear_LCD();
     Home_LCD();
-    Write_number_LCD(400);
-    Write_string_LCD("mS");
 
 //    __enable_irq(); //enable global interrupts (ARM auto clears the flags)
 

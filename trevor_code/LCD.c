@@ -150,6 +150,7 @@ void Write_number_LCD(uint32_t value)
     int str_pos = 0;
     int digits = 0;
     int next_digit;
+    int mult = 0;
 
     for (str_pos = 0; str_pos < 20; str_pos++) {
         string[str_pos] = 0;
@@ -163,12 +164,14 @@ void Write_number_LCD(uint32_t value)
         while (1) {
             next_digit = value;
             digits = 0;
+            mult = 1;
             while (next_digit > 9) {
                 next_digit /= 10;
+                mult *= 10;
                 digits++;
             }
             string[str_pos] = 0x30 + next_digit;
-            value -= next_digit * (digits * 10);
+            value -= next_digit * mult;
             str_pos++;
             if (0 == digits) {
                 break;

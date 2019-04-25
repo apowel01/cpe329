@@ -3,6 +3,7 @@
 #include "keypad.h"
 #include "delay.h"
 #include "lock.h"
+#include "timer_a.h"
 
 /**
  * main.c
@@ -13,11 +14,6 @@ void main(void)
 //    char key_str;
 
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
-
-    lcd_init(); // initialize LCD display
-    Clear_LCD();
-    Home_LCD();
-	keypadinit(); // initialize keypad
 
 #if 0
 	Write_string_LCD("Hello World");

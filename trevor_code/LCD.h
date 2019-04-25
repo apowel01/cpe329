@@ -11,7 +11,7 @@
 void Write_string_LCD(char *p_str);
 void lcd_init(void);
 void Write_char_LCD(unsigned char data);
-void Write_number_LCD(int value);
+void Write_number_LCD(uint32_t value);
 void Clear_LCD(void);
 void Home_LCD(void);
 void lcd_backspace(void);
