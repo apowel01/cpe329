@@ -144,7 +144,7 @@ void Home_LCD(void)
     lcd_command(0x02);
 }
 
-void Write_number_LCD(int value)
+void Write_number_LCD(uint32_t value)
 {
     char string[20];
     int str_pos = 0;

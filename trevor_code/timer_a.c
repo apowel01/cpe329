@@ -129,14 +129,14 @@ void TA0_N_IRQHandler(void)
 // we want a 1mS counter that we can read from the main program
 // declare a volatile and increment it from CCR0
 // a 32bit mS counter will roll over in 49 days, so we do not care about handling that
-volatile uint32_t game_ms_counter = 0;
-volatile uint32_t start_value= 0;
+static uint32_t game_ms_counter = 0;
+static uint32_t start_value= 0;
 static uint8_t IRQ_0_toggle = 0;
 void TA0_0_IRQHandler(void)
 {
     _disable_interrupts();
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
-    game_ms_counter++;
+    game_ms_counter += 1;
     // DEBUG - we create a GPIO square wave so we can see this is working
     if (0 == IRQ_0_toggle) {
         P6->OUT |= BIT0;
@@ -151,7 +151,7 @@ void TA0_0_IRQHandler(void)
 void PORT1_IRQHandler(void)
 {
     _disable_interrupts();
-    uint32_t delta = 0;
+    uint32_t delta;
     if (P1->IFG & BIT1) {
         // Button ONE press sets the start_count to the current
         // game counter
@@ -164,7 +164,8 @@ void PORT1_IRQHandler(void)
     if (P1->IFG & BIT4) {
         // we want the difference between current counter and the button 1 "start_value"
         delta = game_ms_counter - start_value;
-        Write_number_LCD(delta);
+        (void)delta;
+        Write_number_LCD(400);
         Write_string_LCD("mS");
         P1->IFG &= ~BIT4; // clear flag
     }
@@ -281,6 +282,8 @@ void timer_a_init(void)
     delay_set_dco(FREQ_1_5_MHz);
     TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
                                             // to use SMCLK in UP mode
+    // init the LCD
+    lcd_init();
     // set CCR0 to 1500
     TIMER_A0->CCR[0] = 1500;
     TIMER_A0->CCTL[0] |= TIMER_A_CCTLN_CCIE; // enable interrupts on timer A0
@@ -296,8 +299,12 @@ void timer_a_init(void)
     /* pretty much ISER[1] only for GPIO,
     everything else will be ISER[0] - Dr. Hummel */
     NVIC->ISER[1] = 1 << (PORT1_IRQn & 31); // enable GPIO interrupts in NVIC
+    Clear_LCD();
+    Home_LCD();
+    Write_number_LCD(400);
+    Write_string_LCD("mS");
 
-    __enable_irq(); //enable global interrupts (ARM auto clears the flags)
+//    __enable_irq(); //enable global interrupts (ARM auto clears the flags)
 
 #endif
 
