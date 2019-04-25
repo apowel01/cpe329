@@ -13,16 +13,17 @@
 #ifdef PART_A
 void TA0_0_IRQHandler(void)
 {
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+
     // make sure the GPIOs are triggered at the same point in the 2 ISRs,
     // that will minimize any skew caused by instruction processing time
     P6->OUT |= BIT0;
-    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
 }
 
 void TA0_N_IRQHandler(void)
 {
-    P6->OUT &= ~BIT0;
     TIMER_A0->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+    P6->OUT &= ~BIT0;
 }
 #endif
 
@@ -31,6 +32,7 @@ static uint8_t IRQ_toggle = 0;
 void TA0_0_IRQHandler(void)
 {
     P6->OUT |= BIT1;  // measure IRQ execution time
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
 
     // make sure the GPIOs are triggered at the same point in the 2 ISRs,
     // that will minimize any skew caused by instruction processing time
@@ -44,7 +46,6 @@ void TA0_0_IRQHandler(void)
     }
 
 
-    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
 
     P6->OUT &= ~BIT1;  // end measure IRQ execution time
 }
@@ -56,6 +57,8 @@ static volatile uint16_t timer_extender_limit = 1000;
 static uint16_t timer_extender_count = 0;
 void TA0_0_IRQHandler(void)
 {
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+
     // count up to the extender limit befrooe toggling the GPIO
     if (timer_extender_limit > timer_extender_count) {
         timer_extender_count++;
@@ -72,13 +75,14 @@ void TA0_0_IRQHandler(void)
         timer_extender_count = 0;
     }
 
-    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
 }
 #endif
 #ifdef PART_E
 static uint8_t IRQ_0_toggle = 0;
 void TA0_0_IRQHandler(void)
 {
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+
     // make sure the GPIOs are triggered at the same point in the 2 ISRs,
     // that will minimize any skew caused by instruction processing time
     if (0 == IRQ_0_toggle) {
@@ -90,13 +94,15 @@ void TA0_0_IRQHandler(void)
         IRQ_0_toggle = 0;
     }
 
-    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+
 }
 static uint8_t IRQ_N_toggle = 0;
 static volatile uint16_t timer_extender_limit = 1;
 static uint16_t timer_extender_count = 0;
 void TA0_N_IRQHandler(void)
 {
+    TIMER_A0->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+
     // count up to the extender limit befrooe toggling the GPIO
     if (timer_extender_limit > timer_extender_count) {
         timer_extender_count++;
@@ -113,7 +119,7 @@ void TA0_N_IRQHandler(void)
         timer_extender_count = 0;
     }
 
-    TIMER_A0->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+
 }
 #endif
 
