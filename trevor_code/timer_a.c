@@ -4,13 +4,13 @@
  *  Created on: Apr 23, 2019
  *      Author: trevo
  */
-#define PART_B
+#define PART_D
 
 #include "msp.h"
 #include "led.h"
 #include "delay.h"
 
-#ifdef PART_A
+#ifdef PART_C
 void TA0_0_IRQHandler(void)
 {
     // make sure the GPIOs are triggered at the same point in the 2 ISRs,
@@ -26,7 +26,7 @@ void TA0_N_IRQHandler(void)
 }
 #endif
 
-#ifdef PART_B
+#if (defined PART_B) || (defined PART_C)
 static uint8_t IRQ_toggle = 0;
 void TA0_0_IRQHandler(void)
 {
@@ -50,7 +50,32 @@ void TA0_0_IRQHandler(void)
 }
 
 #endif
+#ifdef PART_D
+static uint8_t IRQ_toggle = 0;
+static uint16_t timer_extender_limit = 1;
+static uint16_t timer_extender_count = 0;
+void TA0_0_IRQHandler(void)
+{
+    // count up to the extender limit befrooe toggling the GPIO
+    if (timer_extender_limit > timer_extender_count) {
+        if (0 == IRQ_toggle) {
+            P6->OUT |= BIT0;
+            IRQ_toggle = 1;
+        }
+        else {
+            P6->OUT &= ~BIT0;
+            IRQ_toggle = 0;
+        }
+        timer_extender_count = 0;
+    }
+    else {
+        timer_extender_count++;
+    }
 
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+}
+
+#endif
 void timer_a_init(void)
 {
     P6->DIR |= BIT0 | BIT1;  // GPIO bits, 0 == 25KHz clock, 1 = IRQ execution time
@@ -61,6 +86,12 @@ void timer_a_init(void)
     TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
                                             // to use SMCLK in UP mode
 #ifdef PART_A
+    // set up the clocks
+    delay_set_dco(FREQ_24_0_MHz);
+
+    TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
+                                            // to use SMCLK in UP mode
+
     // set CCR0 to 25KHz and use reset mode
     // 25KHz is a 40uS period, a 24MHz clock does 24 ticks per uS
     // so the period is 24*40 = 960 clock ticks
@@ -75,6 +106,12 @@ void timer_a_init(void)
 
 #endif
 #ifdef PART_B
+    // set up the clocks
+    delay_set_dco(FREQ_24_0_MHz);
+
+    TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
+                                            // to use SMCLK in UP mode
+
     // SET MCLK to P4.3
     P4->SEL0 |= BIT3;
     P4->SEL1 &= ~BIT3;
@@ -83,21 +120,45 @@ void timer_a_init(void)
     // set CCR0 to 25KHz and use reset mode
     // 25KHz is a 40uS period, a 24MHz clock does 24 ticks per uS
     // so the period is 24*40 = 960 clock ticks, 50% duty cycle = 480
-//    TIMER_A0->CCR[0] = 480;  25KHz 50% duty cycle
-    TIMER_A0->CCR[0] = 60;
+    TIMER_A0->CCR[0] = 480;  25KHz 50% duty cycle
     TIMER_A0->CCTL[0] |= TIMER_A_CCTLN_CCIE; // enable interrupts on timer A0
     NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
 #endif
-#ifdef PART_c
+#ifdef PART_C    // set up the clocks
+    delay_set_dco(FREQ_24_0_MHz);
+
+    TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
+                                            // to use SMCLK in UP mode
+
     // SET MCLK to P4.3
     P4->SEL0 |= BIT3;
     P4->SEL1 &= ~BIT3;
     P4->DIR |= BIT3;
 
-    // set CCR0 to be the smallest possible value that works.  In
-    // theory this is when we become bound by the ISR execution time
-    // of about 2.4uS
-    TIMER_A0->CCR[0] = 24;
+    // set CCR0 to be the smallest possible value that works.
+    // Seems to be constrained at about 10uS, or about 240 ticks
+    // Since the ISR takes about
+    TIMER_A0->CCR[0] = 150;
+    TIMER_A0->CCTL[0] |= TIMER_A_CCTLN_CCIE; // enable interrupts on timer A0
+    NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
+#endif
+#ifdef PART_D
+    // set up the clocks
+    delay_set_dco(FREQ_1_5_MHz);
+
+    TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
+                                            // to use SMCLK in UP mode
+
+    // SET MCLK to P4.3
+    P4->SEL0 |= BIT3;
+    P4->SEL1 &= ~BIT3;
+    P4->DIR |= BIT3;
+
+    // We want a 10 Sec period, at 1.5MHz this is 15 million clock ticks.
+    // for simplicity set CCR0 = 50000 and then the ISR will trigger 300 times
+    // for 10 Sec
+    timer_extender_limit = 300;
+    TIMER_A0->CCR[0] = 50000;
     TIMER_A0->CCTL[0] |= TIMER_A_CCTLN_CCIE; // enable interrupts on timer A0
     NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
 #endif
