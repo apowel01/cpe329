@@ -4,10 +4,11 @@
  *  Created on: Apr 23, 2019
  *      Author: trevo
  */
-#define PART_E
+#define PART_F
 
 #include "msp.h"
 #include "led.h"
+#include "lcd.h"
 #include "delay.h"
 
 #ifdef PART_A
@@ -49,8 +50,8 @@ void TA0_0_IRQHandler(void)
 
     P6->OUT &= ~BIT1;  // end measure IRQ execution time
 }
-
 #endif
+
 #ifdef PART_D
 static uint8_t IRQ_toggle = 0;
 static volatile uint16_t timer_extender_limit = 1000;
@@ -77,6 +78,7 @@ void TA0_0_IRQHandler(void)
 
 }
 #endif
+
 #ifdef PART_E
 static uint8_t IRQ_0_toggle = 0;
 void TA0_0_IRQHandler(void)
@@ -123,6 +125,54 @@ void TA0_N_IRQHandler(void)
 }
 #endif
 
+#ifdef PART_F
+// we want a 1mS counter that we can read from the main program
+// declare a volatile and increment it from CCR0
+// a 32bit mS counter will roll over in 49 days, so we do not care about handling that
+volatile uint32_t game_ms_counter = 0;
+volatile uint32_t start_value= 0;
+static uint8_t IRQ_0_toggle = 0;
+void TA0_0_IRQHandler(void)
+{
+    _disable_interrupts();
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+    game_ms_counter++;
+    // DEBUG - we create a GPIO square wave so we can see this is working
+    if (0 == IRQ_0_toggle) {
+        P6->OUT |= BIT0;
+        IRQ_0_toggle = 1;
+    }
+    else {
+        P6->OUT &= ~BIT0;
+        IRQ_0_toggle = 0;
+    }
+    _enable_interrupts();
+}
+void PORT1_IRQHandler(void)
+{
+    _disable_interrupts();
+    uint32_t delta = 0;
+    if (P1->IFG & BIT1) {
+        // Button ONE press sets the start_count to the current
+        // game counter
+        start_value = game_ms_counter;
+        // clear the display ready to print the value
+        Clear_LCD();
+        Home_LCD();
+        P1->IFG &= ~BIT1; // clears button 1
+    }
+    if (P1->IFG & BIT4) {
+        // we want the difference between current counter and the button 1 "start_value"
+        delta = game_ms_counter - start_value;
+        Write_number_LCD(delta);
+        Write_string_LCD("mS");
+        P1->IFG &= ~BIT4; // clear flag
+    }
+
+    _enable_interrupts();
+
+}
+#endif
 
 void timer_a_init(void)
 {
@@ -225,6 +275,30 @@ void timer_a_init(void)
     NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
     NVIC->ISER[0] = 1 << (TA0_N_IRQn & 31); // enable CCR1 ISR
     __enable_irq(); // enable global interrupts
+#endif
+#ifdef PART_F
+    // set up a clock with a 1mS interval to be the counter
+    delay_set_dco(FREQ_1_5_MHz);
+    TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
+                                            // to use SMCLK in UP mode
+    // set CCR0 to 1500
+    TIMER_A0->CCR[0] = 1500;
+    TIMER_A0->CCTL[0] |= TIMER_A_CCTLN_CCIE; // enable interrupts on timer A0
+    NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
+
+    // set up right and left buttons as interrupts
+    P1->DIR &= ~(BIT1 | BIT4); // set as inputs
+    P1->REN |= (BIT1 | BIT4); // enable resistors
+    P1->OUT |= (BIT1 | BIT4); // set resistors to pull-up
+    P1->IES |= (BIT1 | BIT4); // set interrupt on high -> low
+    P1->IFG &= ~(BIT1 | BIT4); // clear interrupt flags
+    P1->IE |= (BIT1 | BIT4); // enable interrupts GPIO
+    /* pretty much ISER[1] only for GPIO,
+    everything else will be ISER[0] - Dr. Hummel */
+    NVIC->ISER[1] = 1 << (PORT1_IRQn & 31); // enable GPIO interrupts in NVIC
+
+    __enable_irq(); //enable global interrupts (ARM auto clears the flags)
+
 #endif
 
     while (1) {
