@@ -11,16 +11,39 @@
 #define LCD_RS BIT5
 #define LCD_RW BIT6
 #define LCD_EN BIT7
+#define LCD_DATA_0 BIT0
+#define LCD_DATA_1 BIT1
+#define LCD_DATA_2 BIT2
+#define LCD_DATA_3 BIT4
+#define LCD_DATA_REG P4
 
+#define LCD_DATA_PINS (LCD_DATA_0 | LCD_DATA_1 | LCD_DATA_2 | LCD_DATA_3)
+
+static void lcd_data_nibble_put(unsigned char nibble)
+{
+    LCD_DATA_REG->OUT &= ~LCD_DATA_PINS;
+    if (nibble & 0x01) {
+        LCD_DATA_REG->OUT |= LCD_DATA_0;
+    }
+    if (nibble & 0x02) {
+        LCD_DATA_REG->OUT |= LCD_DATA_1;
+    }
+    if (nibble & 0x04) {
+        LCD_DATA_REG->OUT |= LCD_DATA_2;
+    }
+    if (nibble & 0x08) {
+        LCD_DATA_REG->OUT |= LCD_DATA_3;
+    }
+
+}
 static void lcd_command_nibble(unsigned char nibble)
 {
     P2->OUT &= ~(LCD_RS | LCD_RW); // set RS/RW low
     P2->OUT &= ~LCD_EN; // set EN low
 
-    P4->OUT &= 0xF0; // forcing bits clear
-    P4->OUT |= (nibble & 0x0F); // lower 4 bits of command
+    lcd_data_nibble_put(nibble & 0x0F);
     P2->OUT |= LCD_EN; // pulse enable
-    _delay_cycles(1 * 3);
+    _delay_cycles(100);
     P2->OUT &= ~LCD_EN;
 }
 
@@ -41,7 +64,9 @@ static void lcd_command(unsigned char cmd)
 
 void lcd_init(void)
 {
-    P4->DIR |= (BIT0 | BIT1 | BIT2 | BIT3); // set data ports to GPIO output
+    LCD_DATA_REG->DIR |= (LCD_DATA_PINS); // set data ports to GPIO output
+//    P5->DIR |= (BIT4 | BIT5 | BIT6 | BIT7); // set data ports to GPIO output
+
     P2->DIR |= (LCD_RS | LCD_RW | LCD_EN); // set pins to output E, R/W, and SEL to output
 
     _delay_cycles(40000 * 3); // wait 40ms
@@ -70,15 +95,14 @@ void Write_char_LCD(unsigned char data)
  //   P2->OUT &= 0xF0; // forcing a clear of bottom 4 pins
 
     // upper 4 bits character
-    P4->OUT &= 0xF0; // forcing bits clear
-    P4->OUT |= ((data >> 4) & 0x0F);
+    lcd_data_nibble_put(data >> 4);
+
     P2->OUT |= LCD_EN;
     _delay_cycles(40 * 3);
     P2->OUT &= ~LCD_EN;
 
     // lower 4 bits character
-    P4->OUT &= 0xF0; // forcing bits clear
-    P4->OUT |= (data & 0x0F);
+    lcd_data_nibble_put(data & 0x0f);
     P2->OUT |= LCD_EN;
     _delay_cycles(40 * 3);
     P2->OUT &= ~LCD_EN;
