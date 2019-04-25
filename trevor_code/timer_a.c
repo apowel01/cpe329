@@ -4,7 +4,7 @@
  *  Created on: Apr 23, 2019
  *      Author: trevo
  */
-#define PART_D
+#define PART_E
 
 #include "msp.h"
 #include "led.h"
@@ -74,8 +74,43 @@ void TA0_0_IRQHandler(void)
 
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
 }
-
 #endif
+#ifdef PART_E
+static uint8_t IRQ_0_toggle = 0;
+void TA0_0_IRQHandler(void)
+{
+    // make sure the GPIOs are triggered at the same point in the 2 ISRs,
+    // that will minimize any skew caused by instruction processing time
+    if (0 == IRQ_0_toggle) {
+        P6->OUT |= BIT0;
+        IRQ_0_toggle = 1;
+    }
+    else {
+        P6->OUT &= ~BIT0;
+        IRQ_0_toggle = 0;
+    }
+
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+}
+static uint8_t IRQ_N_toggle = 0;
+void TA0_N_IRQHandler(void)
+{
+    // make sure the GPIOs are triggered at the same point in the 2 ISRs,
+    // that will minimize any skew caused by instruction processing time
+    if (0 == IRQ_N_toggle) {
+        P6->OUT |= BIT0;
+        IRQ_N_toggle = 1;
+    }
+    else {
+        P6->OUT &= ~BIT0;
+        IRQ_N_toggle = 0;
+    }
+
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+}
+#endif
+
+
 void timer_a_init(void)
 {
     P6->DIR |= BIT0 | BIT1;  // GPIO bits, 0 == 25KHz clock, 1 = IRQ execution time
@@ -123,6 +158,8 @@ void timer_a_init(void)
     TIMER_A0->CCR[0] = 480; // 25KHz 50% duty cycle
     TIMER_A0->CCTL[0] |= TIMER_A_CCTLN_CCIE; // enable interrupts on timer A0
     NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
+    __enable_irq(); // enable global interrupts
+
 #endif
 #ifdef PART_C    // set up the clocks
     delay_set_dco(FREQ_24_0_MHz);
@@ -141,6 +178,8 @@ void timer_a_init(void)
     TIMER_A0->CCR[0] = 150;
     TIMER_A0->CCTL[0] |= TIMER_A_CCTLN_CCIE; // enable interrupts on timer A0
     NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
+    __enable_irq(); // enable global interrupts
+
 #endif
 #ifdef PART_D
     // set up the clocks
@@ -159,6 +198,8 @@ void timer_a_init(void)
     TIMER_A0->CCR[0] = 15000;
     TIMER_A0->CCTL[0] |= TIMER_A_CCTLN_CCIE; // enable interrupts on timer A0
     NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
+    __enable_irq(); // enable global interrupts
+
 #endif
 
     while (1) {
