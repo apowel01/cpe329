@@ -93,20 +93,27 @@ void TA0_0_IRQHandler(void)
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
 }
 static uint8_t IRQ_N_toggle = 0;
+static volatile uint16_t timer_extender_limit = 1;
+static uint16_t timer_extender_count = 0;
 void TA0_N_IRQHandler(void)
 {
-    // make sure the GPIOs are triggered at the same point in the 2 ISRs,
-    // that will minimize any skew caused by instruction processing time
-    if (0 == IRQ_N_toggle) {
-        P6->OUT |= BIT0;
-        IRQ_N_toggle = 1;
+    // count up to the extender limit befrooe toggling the GPIO
+    if (timer_extender_limit > timer_extender_count) {
+        timer_extender_count++;
     }
     else {
-        P6->OUT &= ~BIT0;
-        IRQ_N_toggle = 0;
+        if (0 == IRQ_N_toggle) {
+            P6->OUT |= BIT1;
+            IRQ_N_toggle = 1;
+        }
+        else {
+            P6->OUT &= ~BIT1;
+            IRQ_N_toggle = 0;
+        }
+        timer_extender_count = 0;
     }
 
-    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
+    TIMER_A0->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
 }
 #endif
 
@@ -115,11 +122,6 @@ void timer_a_init(void)
 {
     P6->DIR |= BIT0 | BIT1;  // GPIO bits, 0 == 25KHz clock, 1 = IRQ execution time
 
-    // set up the clocks
-    delay_set_dco(FREQ_24_0_MHz);
-
-    TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
-                                            // to use SMCLK in UP mode
 #ifdef PART_A
     // set up the clocks
     delay_set_dco(FREQ_24_0_MHz);
@@ -200,6 +202,23 @@ void timer_a_init(void)
     NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
     __enable_irq(); // enable global interrupts
 
+#endif
+#ifdef PART_E
+    // set up the clocks
+    delay_set_dco(FREQ_1_5_MHz);
+
+    TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
+                                            // to use SMCLK in UP mode
+
+    // set CCR0 to 500uS and toggle it every IRQ
+    TIMER_A0->CCR[0] = 750;
+    // set CCR1 to 500uS and toggle it every 2nd IRQ
+    TIMER_A0->CCR[1] = 750;    // clear flags here, get code later //
+    TIMER_A0->CCTL[0] |= TIMER_A_CCTLN_CCIE; // enable interrupts on timer A0
+    TIMER_A0->CCTL[1] |= TIMER_A_CCTLN_CCIE;
+    NVIC->ISER[0] = 1 << (TA0_0_IRQn & 31); // enable CCR0 ISR
+    NVIC->ISER[0] = 1 << (TA0_N_IRQn & 31); // enable CCR1 ISR
+    __enable_irq(); // enable global interrupts
 #endif
 
     while (1) {
