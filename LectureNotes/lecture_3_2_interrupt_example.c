@@ -31,7 +31,7 @@ void main(void)
     P1->IE |= (BIT1 | BIT4); // enable interrupts GPIO
     /* pretty much ISER[1] only for GPIO,
     everything else will be ISER[0] - Dr. Hummel */
-    NVIC->ISER[1] = 1 << (POR1_IQRn & 31); // enable GPIO interrupts in NVIC
+    NVIC->ISER[1] = 1 << (POR1_IRQn & 31); // enable GPIO interrupts in NVIC
     __enable_irq(); //enable global interrupts (ARM auto clears the flags)
 
     // do nothing loop

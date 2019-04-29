@@ -4,7 +4,7 @@
 #include "delay.h"
 #include "lock.h"
 #include "timer_a.h"
-
+#include "exec_timing.h"
 /**
  * main.c
  */
@@ -26,7 +26,8 @@ void main(void)
         _delay_cycles(25000);
     }
 #else
-    timer_a_init();
+//    timer_a_init();
 //    lock_main();
+    exec_timing_main();
 #endif
 }
