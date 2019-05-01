@@ -28,6 +28,7 @@ void main(void)
 #else
 //    timer_a_init();
 //    lock_main();
-    exec_timing_main();
+//    exec_timing_main();
+    dac_square_main();
 #endif
 }

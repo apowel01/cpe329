@@ -14,7 +14,7 @@
 
 #include "exec_timing.h"
 
-#define var_type float
+#define var_type int32_t
 
 static var_type test_assign(var_type num)
 {
@@ -129,7 +129,7 @@ void exec_timing_main(void)
     int digit;
     var_type main_var;
 
-    delay_set_dco(CS_CTL0_DCORSEL_1);
+    delay_set_dco(FREQ_3_0_MHz);
     lcd_init();
     keypadinit();
 
