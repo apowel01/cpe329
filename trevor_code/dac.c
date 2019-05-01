@@ -74,11 +74,20 @@ void dac_square_main(void)
 {
     delay_set_dco(FREQ_12_0_MHz);
     dac_init();
+
+#if 0
+    // First test - output 1volt
+    dac_send(1267);
+#endif
+    // second test - square wave 2v peak to peak with a 1v offset
     dac_timer_a_init_square();
+    while(1) {
+
+    }
 }
 
-#define SQUARE_HI 2048
-#define SQUARE_LO 0
+#define SQUARE_HI 3801  // 3*1267 = 3v
+#define SQUARE_LO 1267  // 1 volt from the DC test
 static uint8_t hi_lo_flag = 0;
 void TA0_0_IRQHandler(void)
 {
