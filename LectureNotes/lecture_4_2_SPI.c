@@ -40,8 +40,7 @@ RANDOM EXAMPLE
 void EUSCIB0_IRQHandler(void) {
     if (EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG) { // check receive interrupt flag
         RX_DATA = EUSCI_B0->RXBUF;
-        while (!(EUSCI_B0->IFG & EUSCI_B_IFG_TXBUF));
-        // wait for TXBUF
+        while (!(EUSCI_B0->IFG & EUSCI_B_IFG_TXBUF));   // wait for TXBUF
         EUSCI_B0->TXUF = RX_DATA;
     }
 }
@@ -57,8 +56,7 @@ void main(void) {
     EUSCI_B0->BWR = 0x01; // divide by 1 for full SMCLK freq.
     P1->SEL0 |= (BIT5 | BIT6 | BIT7); // select EUSCI_B0
     P1->SEL1 &= ~(BIT5 |BIT6 | BIT7); // for pins
-    EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_SWRST;
-        // clear reset to activate peripheral
+    EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_SWRST;    // clear reset to activate peripheral
 
     // interrupts on receive
     EUSCI_B0->IE |= EUSCI_B_RXIE; // enable receive interrupts
