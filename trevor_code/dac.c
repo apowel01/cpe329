@@ -59,17 +59,19 @@ void dac_send(uint16_t data)
 
 }
 
-void dac_timer_a_init_square(void)
+void dac_timer_a_init_square(uint32_t up_count)
 {
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt
     TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE; // TACCR0 interrupt enale
-    TIMER_A0->CCR[0] = 0xffff;  // CCR0 counter
+    TIMER_A0->CCR[0] = up_count;  // CCR0 counter
     TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC1; // UP count, SMCLK
     NVIC->ISER[0] = 1 << ((TA0_0_IRQn) & 31);  // NVIC interrupt
     __enable_irq();  // global enable
 
 }
 
+static uint8_t timer_multiple = 0;
+static uint8_t current_multiple = 0;
 void dac_square_main(void)
 {
     delay_set_dco(FREQ_12_0_MHz);
@@ -80,7 +82,7 @@ void dac_square_main(void)
     dac_send(1267);
 #endif
     // second test - square wave 2v peak to peak with a 1v offset
-    dac_timer_a_init_square();
+    dac_timer_a_init_square(0xf800);
     while(1) {
 
     }
@@ -95,7 +97,13 @@ void TA0_0_IRQHandler(void)
 
     if (0 == hi_lo_flag) {
         dac_send(SQUARE_HI);
+        if (current_multiple < timer_multiple) {
+            current_multiple++;
+        }
+        else {
         hi_lo_flag = 1;
+        current_multiple = 0;
+        }
     }
     else {
         dac_send(SQUARE_LO);
