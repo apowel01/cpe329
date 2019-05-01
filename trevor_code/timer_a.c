@@ -4,7 +4,7 @@
  *  Created on: Apr 23, 2019
  *      Author: trevo
  */
-#define PART_F
+#define PART_NONE
 
 #include "msp.h"
 #include "led.h"

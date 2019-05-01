@@ -5,6 +5,7 @@
 #include "lock.h"
 #include "timer_a.h"
 #include "exec_timing.h"
+#include "dac.h"
 /**
  * main.c
  */
