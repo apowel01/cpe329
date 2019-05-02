@@ -83,7 +83,7 @@ void dac_square_main(void)
     dac_send(1267);
 #endif
     // second test - square wave 2v peak to peak with a 1v offset
-    dac_timer_a_init_square(0xf800);
+    dac_timer_a_init_square(0xEB73);
     while(1) {
 
     }
