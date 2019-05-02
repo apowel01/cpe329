@@ -142,9 +142,9 @@ void TA0_0_IRQHandler(void)
         if (triangle_current > TRIANGLE_LO) {
             triangle_current -= TRIANGLE_INCREMENT;
         }
-    }
-    else {
-        hi_lo_flag = 0;
+        else {
+            hi_lo_flag = 0;
+        }
     }
 
     dac_send(triangle_current);
