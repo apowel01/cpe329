@@ -6,6 +6,7 @@
  */
 #include "msp.h"
 #include "delay.h"
+#define TRIANGLE
 
 void dac_init(void)
 {
@@ -88,6 +89,7 @@ void dac_square_main(void)
     }
 }
 
+#ifdef SQUARE
 #define SQUARE_HI 3801  // 3*1267 = 3v
 #define SQUARE_LO 1267  // 1 volt from the DC test
 static uint8_t hi_lo_flag = 0;
@@ -117,3 +119,34 @@ void TA0_0_IRQHandler(void)
 
     }
 }
+#endif
+
+#ifdef TRIANGLE
+#define TRIANGLE_HI 3779  // 3*1267 = 3v
+#define TRIANGLE_LO 1262  // 1 volt from the DC test
+#define TRIANGLE_INCREMENT  100
+static uint16_t triangle_current = 0;
+static uint8_t hi_lo_flag = 0;   // 0 is increment, 1 is decrement
+void TA0_0_IRQHandler(void)
+{
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;  // Clear the CCR0 interrupt
+    if (0 == hi_lo_flag) {
+        if (triangle_current < TRIANGLE_HI) {
+            triangle_current += TRIANGLE_INCREMENT;
+        }
+        else {
+            hi_lo_flag = 1;
+        }
+    }
+    else {
+        if (triangle_current > TRIANGLE_LO) {
+            triangle_current -= TRIANGLE_INCREMENT;
+        }
+    }
+    else {
+        hi_lo_flag = 0;
+    }
+
+    dac_send(triangle_current);
+}
+#endif
