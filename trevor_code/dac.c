@@ -59,7 +59,7 @@ void dac_send(uint16_t data)
 
 }
 
-void dac_timer_a_init_square(uint32_t up_count)
+void dac_timer_a_init_square(uint16_t up_count)
 {
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt
     TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE; // TACCR0 interrupt enale
@@ -101,12 +101,19 @@ void TA0_0_IRQHandler(void)
             current_multiple++;
         }
         else {
-        hi_lo_flag = 1;
-        current_multiple = 0;
+            hi_lo_flag = 1;
+            current_multiple = 0;
         }
     }
     else {
         dac_send(SQUARE_LO);
-        hi_lo_flag = 0;
+        if (current_multiple < timer_multiple) {
+            current_multiple++;
+        }
+        else {
+            hi_lo_flag = 1;
+            current_multiple = 0;
+        }
+
     }
 }
