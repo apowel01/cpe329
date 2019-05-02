@@ -64,7 +64,7 @@ void dac_timer_a_init_square(uint16_t up_count)
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt
     TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE; // TACCR0 interrupt enale
     TIMER_A0->CCR[0] = up_count;  // CCR0 counter
-    TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC1; // UP count, SMCLK
+    TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // UP count, SMCLK
     NVIC->ISER[0] = 1 << ((TA0_0_IRQn) & 31);  // NVIC interrupt
     __enable_irq();  // global enable
 
