@@ -35,5 +35,9 @@ void main(void)
 //    dac_main();
 
     uart_init();
+
+    while(1) {
+        uart_put_char('#');
+    }
 #endif
 }
