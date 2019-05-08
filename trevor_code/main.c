@@ -30,6 +30,6 @@ void main(void)
 //    timer_a_init();
 //    lock_main();
 //    exec_timing_main();
-    dac_square_main();
+    dac_main();
 #endif
 }

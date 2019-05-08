@@ -90,8 +90,8 @@ void dac_square_main(void)
 }
 
 #ifdef SQUARE
-#define SQUARE_HI 3801  // 3*1267 = 3v
-#define SQUARE_LO 1267  // 1 volt from the DC test
+#define SQUARE_HI 3779  // 3*1267 = 3v
+#define SQUARE_LO 1262  // 1 volt from the DC test
 static uint8_t hi_lo_flag = 0;
 void TA0_0_IRQHandler(void)
 {
