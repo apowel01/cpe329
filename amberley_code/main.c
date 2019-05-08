@@ -37,6 +37,9 @@ void main(void)
     uart_init();
 
     while(1) {
+        //while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+        //EUSCI_A0->TXBUF = 'A';
+
         uart_put_char('#');
     }
 #endif
