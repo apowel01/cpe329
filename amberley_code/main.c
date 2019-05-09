@@ -32,14 +32,20 @@ void main(void)
 //    timer_a_init();
 //    lock_main();
 //    exec_timing_main();
-//    dac_main();
-    char new_char;
+    uint16_t inValue;
+    dac_init();
     uart_init();
 
     while(1) {
         //while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
         //EUSCI_A0->TXBUF = 'A';
-        new_char = uart_get_char();
+        inValue = uart_get_value();
+        if (inValue < 4096) {
+            dac_send(inValue);
+        }
+        else {
+            uart_put_str("ERROR: number out of range");
+        }
     }
 
 #endif

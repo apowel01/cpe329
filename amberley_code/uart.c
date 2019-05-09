@@ -80,23 +80,43 @@ char uart_get_char(void)
     return (char)(EUSCI_A0->RXBUF & 0xFF); // cast receive buffer as char
 }
 #else
-static char last_char = 'A';
+static uint16_t last_value = 0;
 static uint8_t ready_to_read = 0;
-char uart_get_char(void)
+uint16_t uart_get_value(void)
 {
+    uint16_t tvalue;
     // wait for the RX buffer to be ready
     while(ready_to_read != 1) {
     }
+    tvalue = last_value;
+    last_value = 0;
     ready_to_read = 0;
-    uart_put_char(last_char); // echo char to terminal
-    return last_char; // cast receive buffer as char
+    return tvalue; // cast receive buffer as char
 }
 #endif
 // Basic receive IRQ handler
 void EUSCIA0_IRQHandler(void)
 {
+    char last_char;
     EUSCI_A0->IFG &= ~EUSCI_A_IFG_RXIFG;  // Clear the RX interrupt flag
-
+    // read the character
     last_char = (char)(EUSCI_A0->RXBUF & 0xFF);
-    ready_to_read = 1;
+    // echo it back
+    // wait for the Tx buffer to be ready
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG)) {
+    }
+    // buffer is free, write out data
+    EUSCI_A0->TXBUF = last_char;
+    // parse character
+    if ((last_char >= 0x30) && (last_char <= 0x39)) {
+        last_value = (last_value * 10) + (last_char - 0x30);
+    }
+    else if (last_char == 0xD) {
+        // wait for the Tx buffer to be ready
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG)) {
+        }
+        // buffer is free, write out data
+        EUSCI_A0->TXBUF = 0xA;
+        ready_to_read = 1;
+    }
 }
