@@ -37,6 +37,10 @@ void uart_init(void)
     P1->SEL0 |= (BIT2|BIT3);   // Configure EUSCI_A0
     P1->SEL1 &= ~(BIT2|BIT3); //TX and Rx pins
     EUSCI_A0->CTLW0 &= ~EUSCI_A_CTLW0_SWRST; // Activate serial device
+
+    EUSCI_A0->IE |= EUSCI_A_IE_RXIE; // enable interrupts
+    NVIC->ISER[0] = 1 << ((EUSCIA0_IRQn) & 31);  // NVIC interrupt
+    __enable_irq(); // enable global interrupts
 }
 
 // output  single character - note, we do not do this in interrupt,
@@ -66,7 +70,7 @@ void uart_put_str(char * p_str)
         p_str++;
     }
 }
-
+#if 0
 // get character from receive register
 char uart_get_char(void)
 {
@@ -74,4 +78,25 @@ char uart_get_char(void)
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_RXIFG)) {
     }
     return (char)(EUSCI_A0->RXBUF & 0xFF); // cast receive buffer as char
+}
+#else
+static char last_char = 'A';
+static uint8_t ready_to_read = 0;
+char uart_get_char(void)
+{
+    // wait for the RX buffer to be ready
+    while(ready_to_read != 1) {
+    }
+    ready_to_read = 0;
+    uart_put_char(last_char); // echo char to terminal
+    return last_char; // cast receive buffer as char
+}
+#endif
+// Basic receive IRQ handler
+void EUSCIA0_IRQHandler(void)
+{
+    EUSCI_A0->IFG &= ~EUSCI_A_IFG_RXIFG;  // Clear the RX interrupt flag
+
+    last_char = (char)(EUSCI_A0->RXBUF & 0xFF);
+    ready_to_read = 1;
 }
