@@ -67,3 +67,11 @@ void uart_put_str(char * p_str)
     }
 }
 
+// get character from receive register
+char uart_get_char(void)
+{
+    // wait for the RX buffer to be ready
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_RXIFG)) {
+    }
+    return (char)(EUSCI_A0->RXBUF & 0xFF); // cast receive buffer as char
+}

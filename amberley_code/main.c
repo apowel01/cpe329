@@ -33,14 +33,16 @@ void main(void)
 //    lock_main();
 //    exec_timing_main();
 //    dac_main();
-
+    char new_char;
     uart_init();
+
 
     while(1) {
         //while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
         //EUSCI_A0->TXBUF = 'A';
-
-        uart_put_char('#');
+        new_char = uart_get_char();
+        uart_put_char(new_char);
     }
+
 #endif
 }
