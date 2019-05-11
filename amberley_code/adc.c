@@ -31,7 +31,7 @@ void adc_init(void) {
     P6->SEL0 |= BIT1;
     P6->SEL1 |= BIT1;
 }
-void main(void)
+void adc_main(void)
 {
     adc_init();
 
