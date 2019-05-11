@@ -5,6 +5,8 @@
  *      Author: Amberley
  */
 #include "msp.h"
+#include "delay.h"
+#include "dac.h"
 
 #define RXBUF_CHAR_MASK 0xFF
 // ascii values used
