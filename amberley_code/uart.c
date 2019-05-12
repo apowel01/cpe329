@@ -110,6 +110,47 @@ void EUSCIA0_IRQHandler(void)
     }
 }
 
+void uart_put_num(uint32_t value)
+{
+    int num_digits;
+    char string[20];
+    int str_pos = 0;
+    int digits = 0;
+    int next_digit;
+    int mult = 0;
+
+    for (str_pos = 0; str_pos < 20; str_pos++) {
+        string[str_pos] = 0;
+    }
+
+    if (0 == value) {
+        string[0] = 0x30;
+    }
+    else {
+        str_pos = 0;
+        next_digit = value;
+        num_digits = 0;
+        while (next_digit > 0) {
+            next_digit /= 10;
+            num_digits++;
+        }
+        while (num_digits > 0) {
+            next_digit = value;
+            mult = 1;
+            while (next_digit > 9) {
+                next_digit /= 10;
+                mult *= 10;
+            }
+            string[str_pos] = 0x30 + next_digit;
+            value -= next_digit * mult;
+            str_pos++;
+            num_digits--;
+        }
+    }
+
+    uart_put_str(string);
+}
+
 void uart_main(void)
 {
     uint16_t inValue;

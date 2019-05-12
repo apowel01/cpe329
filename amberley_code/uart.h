@@ -13,5 +13,6 @@ void uart_put_char(char chr);
 void uart_put_str(char * p_str);
 uint16_t uart_get_value(void);
 void uart_main(void);
+void uart_put_num(uint32_t value);
 
 #endif /* UART_H_ */

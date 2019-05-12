@@ -9,17 +9,35 @@
 #include "uart.h"
 #include "adc.h"
 
-volatile uint16_t analogValue;
+// flag values
+#define READ_FLAG_READY 1
+#define READ_FLAG_NOT_READY 0
+
+
+static uint16_t analogValue = 0;
+static uint8_t ready_to_read = READ_FLAG_NOT_READY;
+uint16_t adc_get_value(void)
+{
+    uint16_t tvalue;
+    // wait for the RX buffer to be ready
+    while(ready_to_read != READ_FLAG_READY) {
+    }
+    tvalue = analogValue;
+    ready_to_read = READ_FLAG_NOT_READY;
+    return tvalue; // cast receive buffer as char
+}
+
 // interrupt handler for the ADC
 void ADC14_IRQHandler(void) {
     analogValue = ADC14->MEM[2]; // read conversion value; reading auto clears interrupt flag
+    ready_to_read = READ_FLAG_READY;
 }
 
 void adc_init(void) {
     // configure ADC14
     ADC14->CTL0 &= ~ADC14_CTL0_ENC; // disable ADC for configuration
     ADC14->CTL0 = ADC14_CTL0_SHP // sample pulse mode, use internal sample timer
-                | ADC14_CTL0_SSEL_4 // select HSMCLK
+                | ADC14_CTL0_SSEL_4 // select SMCLK
                 | ADC14_CTL0_SHT0_0 // select 4 clocks for mem[2]
                 | ADC14_CTL0_ON; // turn on ADC14
     ADC14->CTL1 = (2 << ADC14_CTL1_CSTARTADD_OFS) // start conversions using mem[2]
@@ -38,10 +56,5 @@ void adc_init(void) {
 
 void adc_main(void)
 {
-    adc_init();
 
-    while(1) {
-        ADC14->CTL0 |= ADC14_CTL0_SC; // start a conversion
-        delay_us(1000); // wait 1ms between conversions
-    }
 }
