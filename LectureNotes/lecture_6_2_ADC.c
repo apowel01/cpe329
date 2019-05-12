@@ -35,7 +35,7 @@ void main(void)
     ADC14->MCTL[2] = ADC14_MCTLN_INCH_14; // read from channel 14(A14)
     ADC14->CTL0 |= ADC14_CTL0_END; // enable ADC
     ADC14->IER0 |= ADC14_IER0_IE_2; // enable interrupts on MEM2
-    NVIC->ISER[0] = (1 << ADC14_IRQr & 31); //enable ADC ISR in NVIC
+    NVIC->ISER[0] = (1 << ADC14_IRQn & 31); //enable ADC ISR in NVIC
     __enable_irq(); // enable global interrupts
     P6->SEL0 |= BIT1; // select A14 input function
     P6->SEL1 |= BIT1;
