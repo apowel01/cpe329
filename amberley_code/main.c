@@ -7,11 +7,11 @@
  * main.c
  */
 
-#define CALIBRATION_ZERO_TO_ONE_VOLT 5140
-#define CALIBRATION_ONE_TO_TWO_VOLTS 5095 // working
-#define CALIBRATION_TWO_TO_THREE_VOLTS 5040 // working
-#define USE_ONE_TO_TWO_VOLTS 5184
-#define USE_TWO_TO_THREE_VOLTS 10368
+#define CALIBRATION_ZERO_TO_ONE_VOLT 4950 // 5140 **4900 works better *4850 works Perfectly from [0.04-0.37] (under 0.04 could use a boost) and effectively(=/- 1) out of acceptable range around .6
+#define CALIBRATION_ONE_TO_TWO_VOLTS 4950 // working 5095   4900 lower half doesn't like vals above 5k but upper half fails around 1.45
+#define CALIBRATION_TWO_TO_THREE_VOLTS 4960 // working 5040
+#define USE_ONE_TO_TWO_VOLTS 4990        //5184 *I think this original value was calibrated too high and that 4990 is a more accurate threshold
+#define USE_TWO_TO_THREE_VOLTS 10368     //10368
 
 static void put_voltage(uint16_t adc_value)
 {

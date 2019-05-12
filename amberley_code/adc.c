@@ -38,7 +38,7 @@ void adc_init(void) {
     ADC14->CTL0 &= ~ADC14_CTL0_ENC; // disable ADC for configuration
     ADC14->CTL0 = ADC14_CTL0_SHP // sample pulse mode, use internal sample timer
                 | ADC14_CTL0_SSEL_4 // select SMCLK
-                | ADC14_CTL0_SHT0_5 // select 4 clocks for mem[2]
+                | ADC14_CTL0_SHT0_0 // select 4 clocks for mem[2]
                 | ADC14_CTL0_ON; // turn on ADC14
     ADC14->CTL1 = (2 << ADC14_CTL1_CSTARTADD_OFS) // start conversions using mem[2]
                                                   // shift 2 into bits 20-16
