@@ -34,8 +34,8 @@ static void lcd_data_nibble_put(unsigned char nibble)
     if (nibble & 0x08) {
         LCD_DATA_REG->OUT |= LCD_DATA_3;
     }
-
 }
+
 static void lcd_command_nibble(unsigned char nibble)
 {
     P2->OUT &= ~(LCD_RS | LCD_RW); // set RS/RW low

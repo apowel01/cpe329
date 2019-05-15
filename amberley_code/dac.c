@@ -8,8 +8,7 @@
 #include "msp.h"
 #include "delay.h"
 
-// #define TRIANGLE // use to select TRIANGLE or SQUARE functions for the IRQ handler
-
+// period defines
 #define SQUARE_PERIOD 0xEB73 // set the period of the square wave to 20ms
 #define TRIANGLE_PERIOD 617 // set the period of the triangle wave to 20ms
 
@@ -21,6 +20,7 @@
 #define DAC_CS BIT2 // DAC CS is P5.2
 #define NVIC_int_const 31
 
+// initalize the dac
 void dac_init(void)
 {
     // init SPI us
@@ -89,7 +89,7 @@ void dac_send(uint16_t data)
 void dac_timer_a_init_square(uint16_t up_count)
 {
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt
-    TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE; // TACCR0 interrupt enale
+    TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE; // TACCR0 interrupt enable
     TIMER_A0->CCR[0] = up_count;  // CCR0 counter
     TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // UP count, SMCLK
     NVIC->ISER[0] = 1 << ((TA0_0_IRQn) & NVIC_int_const);  // NVIC interrupt

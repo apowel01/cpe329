@@ -82,6 +82,7 @@ static uint8_t get_key (void)
     return key;
 }
 
+// return keypad press in ASCII form
 char keypad_get_ascii(void)
 {
     char key_str;
@@ -105,6 +106,8 @@ char keypad_get_ascii(void)
 
     return key_str;
 }
+
+// get number in int form from keypad
 int keypad_get_number(uint8_t digits)
 {
     int number = 0;
@@ -129,6 +132,7 @@ int keypad_get_number(uint8_t digits)
     return number;
 }
 
+// return digit pressed by kepyad in int form
 int keypad_get_digit()
 {
     int number = 0;

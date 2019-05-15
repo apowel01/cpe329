@@ -7,68 +7,74 @@
  * main.c
  */
 
-#define CALIBRATION_ZERO_TO_ONE_HALF_VOLT 4865 // 5140 **4900 works better *4850 works Perfectly from [0.04-0.37] (under 0.04 could use a boost) and effectively(=/- 1) out of acceptable range around .6
+// ADC define values for calibration
+#define CALIBRATION_ZERO_TO_ONE_HALF_VOLT 4865
 #define CALIBRATION_ONE_HALF_TO_ONE_VOLT 4950
 #define CALIBRATION_ONE_TO_ONE_AND_HALF_VOLTS 4950
-#define CALIBRATION_ONE_AND_HALF_TO_TWO_VOLTS 4970 // working 5095   4900 lower half doesn't like vals above 5k but upper half fails around 1.45
-#define CALIBRATION_TWO_TO_THREE_VOLTS 4965 // working 5040
+#define CALIBRATION_ONE_AND_HALF_TO_TWO_VOLTS 4970
+#define CALIBRATION_TWO_TO_THREE_VOLTS 4965
+// ADC define values for thresholds
 #define USE_ONE_HALF_TO_ONE_VOLT 2240
-#define USE_ONE_TO_ONE_AND_HALF_VOLT 4990        //5184 *I think this original value was calibrated too high and that 4990 is a more accurate threshold
+#define USE_ONE_TO_ONE_AND_HALF_VOLT 4990
 #define USE_ONE_AND_HALF_TO_TWO_VOLT 7690
-#define USE_TWO_TO_THREE_VOLTS 10368     //10368
+#define USE_TWO_TO_THREE_VOLTS 10368
 
+// read analog voltage as digital
 static void put_voltage(uint16_t adc_value)
 {
-    static uint16_t calibration = 5045;
-    uint32_t volts;
-    uint32_t tenths;
-    uint32_t hundredths;
-    uint32_t voltage_remainder = 0;
-    if (adc_value > USE_TWO_TO_THREE_VOLTS) {
+    static uint16_t calibration = 5045; // default calibration value
+    uint32_t volts; // volts place
+    uint32_t tenths; // tenths place
+    uint32_t hundredths; // hundredths place
+    uint32_t voltage_remainder = 0; // default remainder
+    // determine which calibration to use based on voltage range
+    if (adc_value > USE_TWO_TO_THREE_VOLTS) { // if value is greater than 2V
         calibration = CALIBRATION_TWO_TO_THREE_VOLTS;
     }
-    else if (adc_value > USE_ONE_AND_HALF_TO_TWO_VOLT) {
+    else if (adc_value > USE_ONE_AND_HALF_TO_TWO_VOLT) { // greater than 1.5V
         calibration = CALIBRATION_ONE_AND_HALF_TO_TWO_VOLTS;
     }
-    else if (adc_value > USE_ONE_TO_ONE_AND_HALF_VOLT) {
+    else if (adc_value > USE_ONE_TO_ONE_AND_HALF_VOLT) { // greater than 1V
         calibration = CALIBRATION_ONE_TO_ONE_AND_HALF_VOLTS;
     }
-    else if (adc_value > USE_ONE_HALF_TO_ONE_VOLT) {
+    else if (adc_value > USE_ONE_HALF_TO_ONE_VOLT) { // greater than 0.5V
         calibration = CALIBRATION_ONE_HALF_TO_ONE_VOLT;
     }
-    else {
+    else { // less than 0.5V
         calibration = CALIBRATION_ZERO_TO_ONE_HALF_VOLT;
     }
-    voltage_remainder = adc_value * 100;
-    voltage_remainder /= calibration;
-    volts = voltage_remainder / 100;
-    voltage_remainder -= volts * 100;
-    tenths = voltage_remainder / 10;
-    hundredths = voltage_remainder - (tenths * 10);
+    voltage_remainder = adc_value * 100; // get remainder without
+    voltage_remainder /= calibration;    // ...using any floats
+    volts = voltage_remainder / 100; // save remainder as uint32_t
+    voltage_remainder -= volts * 100; // remove volts informatino
+    tenths = voltage_remainder / 10; // save tenths place
+    hundredths = voltage_remainder - (tenths * 10); // save hundredths place
+    // print voltage readout to UART terminal
     uart_put_num(volts);
     uart_put_char('.');
     uart_put_num(tenths);
     uart_put_num(hundredths);
-    uart_put_str("V\r\n");
+    uart_put_str("V\r\n"); // print 'V' for units of volts and return new line
 }
 
+// main function
 void main(void)
-    {
-
+{
     uint16_t new_value = 0;
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
     delay_set_dco(FREQ_3_0_MHz);
 
+    // init ADC and UART
     adc_init();
     uart_init();
 
+    // continuously read then print values from ADC to UART terminal
     while(1) {
-        ADC14->CTL0 |= ADC14_CTL0_SC; // start a conversion
-        new_value = adc_get_value();
-        put_voltage(new_value);
-//        delay_sec(0);
-        delay_ms(500);
+        ADC14->CTL0 |= ADC14_CTL0_SC; // start a conversion from A to D
+        new_value = adc_get_value(); // get the new analog value
+        put_voltage(new_value); // display value to terminal
+        delay_ms(500); // delay for UART send time
     }
 }

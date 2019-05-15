@@ -110,6 +110,7 @@ void EUSCIA0_IRQHandler(void)
     }
 }
 
+// output number to UART 
 void uart_put_num(uint32_t value)
 {
     int num_digits;
@@ -162,8 +163,6 @@ void uart_main(void)
     uart_init();
 
     while(1) {
-        //while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-        //EUSCI_A0->TXBUF = 'A';
         inValue = uart_get_value();
         if (inValue < 4096) {
             dac_send(inValue);

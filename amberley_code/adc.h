@@ -8,7 +8,6 @@
 #ifndef ADC_H_
 #define ADC_H_
 
-void adc_main(void);
 uint16_t adc_get_value(void);
 void adc_init(void);
 

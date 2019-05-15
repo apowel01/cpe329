@@ -9,30 +9,34 @@
 #include "uart.h"
 #include "adc.h"
 
-// flag values
+// flag defines
 #define READ_FLAG_READY 1
 #define READ_FLAG_NOT_READY 0
 
-
+// local file variables
 static uint16_t analogValue = 0;
 static uint8_t ready_to_read = READ_FLAG_NOT_READY;
+
+// get value from the ADC
 uint16_t adc_get_value(void)
 {
-    uint16_t tvalue;
+    uint16_t tvalue; // temp value
     // wait for the RX buffer to be ready
     while(ready_to_read != READ_FLAG_READY) {
     }
     tvalue = analogValue;
-    ready_to_read = READ_FLAG_NOT_READY;
+    ready_to_read = READ_FLAG_NOT_READY; // set read flag low
     return tvalue; // cast receive buffer as char
 }
 
 // interrupt handler for the ADC
 void ADC14_IRQHandler(void) {
-    analogValue = ADC14->MEM[2]; // read conversion value; reading auto clears interrupt flag
+    analogValue = ADC14->MEM[2]; // read conversion value
+                                 // reading auto clears interrupt flag
     ready_to_read = READ_FLAG_READY;
 }
 
+// initialize the adc
 void adc_init(void) {
     // configure ADC14
     ADC14->CTL0 &= ~ADC14_CTL0_ENC; // disable ADC for configuration
@@ -52,9 +56,4 @@ void adc_init(void) {
     // select A14 input function on P6.1
     P6->SEL0 |= BIT1;
     P6->SEL1 |= BIT1;
-}
-
-void adc_main(void)
-{
-
 }

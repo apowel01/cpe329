@@ -9,25 +9,24 @@
 #include "keypad.h"
 #include "delay.h"
 #include "math.h"
-//#include "lock.h"
-//#include "timer_a.h"
-
 #include "exec_timing.h"
 
 #define var_type double
 
+// assignment test
 static var_type test_assign(var_type num)
 {
     var_type test_var;
 
-    P1->OUT |= BIT0;// turn RED LED on
+    P1->OUT |= BIT0; // turn RED LED on
 
     test_var = num;
 
-    P1->OUT &= ~BIT0;
+    P1->OUT &= ~BIT0; // turn RED led off
     return test_var;
 }
 
+// add 1
 static var_type test_add_1(var_type num)
 {
     var_type test_var;
@@ -40,6 +39,7 @@ static var_type test_add_1(var_type num)
     return test_var;
 }
 
+// add 7
 static var_type test_add_7(var_type num)
 {
     var_type test_var;
@@ -52,6 +52,7 @@ static var_type test_add_7(var_type num)
     return test_var;
 }
 
+// multiply by 2
 static var_type test_mul_2(var_type num)
 {
     var_type test_var;
