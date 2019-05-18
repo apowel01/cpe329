@@ -17,8 +17,9 @@
 #define READY_FLAG_READY 1
 #define READY_FLAG_NOT_READY 0
 // baud rate values
-#define BRW_FOR_3_MHZ 0x01
-#define BRF_FOR_3_MHZ 10
+#define BRW_FOR_48_MHZ 26
+#define BRF_FOR_48_MHZ 0
+
 // Initialize the UART
 void uart_init(void)
 {
@@ -27,9 +28,8 @@ void uart_init(void)
     EUSCI_A0->CTLW0 = EUSCI_A_CTLW0_UCSSEL_2 // SMCLK
             | EUSCI_A_CTLW0_MODE_0 // UART mode
             | EUSCI_A_CTLW0_SWRST; // keep in reset
-    EUSCI_A0->BRW = BRW_FOR_3_MHZ; // from baud rate calculation
-    EUSCI_A0->MCTLW = (BRF_FOR_3_MHZ << EUSCI_A_MCTLW_BRF_OFS) //causing it to shift 4 bits as
-                        |EUSCI_A_MCTLW_OS16;      //offest from mctlw register
+    EUSCI_A0->BRW = BRW_FOR_48_MHZ; // from baud rate calculation
+    EUSCI_A0->MCTLW = (BRF_FOR_48_MHZ << EUSCI_A_MCTLW_BRF_OFS) | EUSCI_A_MCTLW_OS16;
     P1->SEL0 |= (BIT2|BIT3);   // Configure EUSCI_A0
     P1->SEL1 &= ~(BIT2|BIT3); //TX and Rx pins
     EUSCI_A0->CTLW0 &= ~EUSCI_A_CTLW0_SWRST; // Activate serial device
