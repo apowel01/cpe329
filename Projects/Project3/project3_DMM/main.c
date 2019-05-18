@@ -3,6 +3,7 @@
 #include "uart.h"
 #include "adc.h"
 #include "timer_a.h"
+#include "vt100.h"
 
 /**
  * main.c
@@ -71,13 +72,16 @@ void main(void)
     adc_init();
     uart_init();
     timer_a_init();
+    vt100_init();
 
     // enable interrupts
     __enable_irq();
 
     // continuously read then print values from ADC to UART terminal
     while(1) {
+        vt100_clear_screen();
         new_value = adc_get_frequency(); // get the new analog value
+        vt100_set_cursor_position(10,10);
         put_voltage(new_value); // display value to terminal
         delay_ms(500); // delay for UART send time
     }

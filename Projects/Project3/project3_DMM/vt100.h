@@ -8,7 +8,7 @@
 #ifndef VT100_H_
 #define VT100_H_
 
-
+void vt100_clear_screen(void);
 
 
 
