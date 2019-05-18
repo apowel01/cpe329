@@ -1,6 +1,5 @@
 #include "msp.h"
 #include "delay.h"
-#include "dac.h"
 #include "uart.h"
 #include "adc.h"
 /**
@@ -46,7 +45,7 @@ static void put_voltage(uint16_t adc_value)
     voltage_remainder = adc_value * 100; // get remainder without
     voltage_remainder /= calibration;    // ...using any floats
     volts = voltage_remainder / 100; // save remainder as uint32_t
-    voltage_remainder -= volts * 100; // remove volts informatino
+    voltage_remainder -= volts * 100; // remove volts information
     tenths = voltage_remainder / 10; // save tenths place
     hundredths = voltage_remainder - (tenths * 10); // save hundredths place
     // print voltage readout to UART terminal
@@ -64,7 +63,8 @@ void main(void)
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
-    delay_set_dco(FREQ_3_0_MHz);
+    // set clock frequency
+    delay_set_dco(FREQ_48_0_MHz);
 
     // init ADC and UART
     adc_init();

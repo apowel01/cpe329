@@ -116,7 +116,7 @@ void uart_put_num(uint32_t value)
     int num_digits;
     char string[20];
     int str_pos = 0;
-    int digits = 0;
+    //int digits = 0;
     int next_digit;
     int mult = 0;
 
