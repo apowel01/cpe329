@@ -6,7 +6,6 @@
  */
 #include "msp.h"
 #include "delay.h"
-#include "dac.h"
 
 #define RXBUF_CHAR_MASK 0xFF
 // ascii values used
@@ -152,6 +151,7 @@ void uart_put_num(uint32_t value)
     uart_put_str(string);
 }
 
+#if 0 // *AMP
 void uart_main(void)
 {
     uint16_t inValue;
@@ -172,3 +172,4 @@ void uart_main(void)
         }
     }
 }
+#endif

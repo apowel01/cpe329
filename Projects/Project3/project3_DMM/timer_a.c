@@ -2,13 +2,11 @@
  * timer_a.c
  *
  *  Created on: Apr 23, 2019
- *      Author: trevo
+ *      Author: Amberley
  */
 #define PART_NONE
 
 #include "msp.h"
-#include "led.h"
-#include "lcd.h"
 #include "delay.h"
 
 #ifdef PART_A
