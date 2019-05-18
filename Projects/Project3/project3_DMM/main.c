@@ -2,6 +2,7 @@
 #include "delay.h"
 #include "uart.h"
 #include "adc.h"
+#include "timer_a.h"
 
 /**
  * main.c
@@ -76,7 +77,7 @@ void main(void)
 
     // continuously read then print values from ADC to UART terminal
     while(1) {
-        new_value = adc_get_value(); // get the new analog value
+        new_value = adc_get_frequency(); // get the new analog value
         put_voltage(new_value); // display value to terminal
         delay_ms(500); // delay for UART send time
     }

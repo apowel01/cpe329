@@ -42,6 +42,29 @@ void ADC14_IRQHandler(void)
     }
 }
 
+// determine input waveform frequency
+uint32_t adc_get_frequency(void)
+{
+    int i;
+    uint32_t num_rising_edges = 0;
+    int currently_rising = 0;
+    // count rising edges
+    for (i = 1; i < SAMPLES_PER_SECOND; i++) {
+        if (currently_rising == 0) {
+            if (samples[i-1] < samples[i]) {
+                currently_rising = 1;
+                num_rising_edges++;
+            }
+        }
+        else {
+            if (samples[i-1] > samples[i]) {
+                currently_rising = 0;
+            }
+        }
+    }
+    return num_rising_edges;
+}
+
 // initialize the adc
 void adc_init(void)
 {
