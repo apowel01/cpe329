@@ -10,5 +10,6 @@
 
 uint16_t adc_get_value(void);
 void adc_init(void);
+uint32_t adc_get_samples_per_second(void);
 
 #endif /* ADC_H_ */

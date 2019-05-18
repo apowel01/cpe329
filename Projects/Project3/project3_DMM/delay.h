@@ -15,13 +15,11 @@
 #define FREQ_24_0_MHz 240
 #define FREQ_48_0_MHz 480
 
-void set_DCO(int freq);
-int get_DCO_MHz(void);
 void delay_us(int us);
 void delay_ms(int ms);
 void delay_sec(int sec);
-
 void delay_test(void);
 void delay_set_dco(int freq);
+uint32_t delay_get_dco_freq(void);
 
 #endif /* DELAY_H_ */

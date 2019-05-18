@@ -69,10 +69,13 @@ void main(void)
     // init ADC and UART
     adc_init();
     uart_init();
+    timer_a_init();
+
+    // enable interrupts
+    __enable_irq();
 
     // continuously read then print values from ADC to UART terminal
     while(1) {
-        ADC14->CTL0 |= ADC14_CTL0_SC; // start a conversion from A to D
         new_value = adc_get_value(); // get the new analog value
         put_voltage(new_value); // display value to terminal
         delay_ms(500); // delay for UART send time

@@ -62,6 +62,32 @@ void delay_set_dco(int freq)
     CS->KEY = 0; // lock the CS registers
 }
 
+uint32_t delay_get_dco_freq(void)
+{
+    uint32_t frequency = 0;
+    switch(dco_frequency) {
+    case FREQ_1_5_MHz:
+        frequency = 1500000;
+        break;
+    case FREQ_3_0_MHz:
+        frequency = 3000000;
+        break;
+    case FREQ_6_0_MHz:
+        frequency = 6000000;
+        break;
+    case FREQ_12_0_MHz:
+        frequency = 12000000;
+        break;
+    case FREQ_24_0_MHz:
+        frequency = 24000000;
+        break;
+    case FREQ_48_0_MHz:
+        frequency = 48000000;
+        break;
+    }
+    return frequency;
+}
+
 void delay_us(int us)
 {
  //   int count;
