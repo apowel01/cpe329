@@ -102,6 +102,15 @@ void vt100_put_vpp(uint32_t value)
     vt100_put_num_2_decimals(value);
 }
 
+// update Vrms to terminal
+void vt100_put_rms_volts(uint32_t value)
+{
+    vt100_set_cursor_position(RMS_LINE,RMS_VALUE_COL_START);
+    uart_put_str("    "); // clear value space
+    vt100_set_cursor_position(RMS_LINE,RMS_VALUE_COL_START);
+    vt100_put_num_2_decimals(value);
+}
+
 // clear the entire terminal screen
 void vt100_clear_screen(void)
 {
