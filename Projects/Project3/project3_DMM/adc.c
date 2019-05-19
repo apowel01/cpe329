@@ -110,7 +110,7 @@ static void adc_analyze_buffer(sample_buffer_t *p_buffer)
 }
 
 // determine input waveform frequency
-void adc_get_values(uint32_t *p_frequency)
+void adc_get_values(uint32_t *p_frequency, uint32_t *p_dc_offset, uint32_t *p_vpp)
 {
     uint32_t my_buffer = 0;
     sample_buffer_t *p_buffer = &sample_buffers[my_buffer];
@@ -125,6 +125,8 @@ void adc_get_values(uint32_t *p_frequency)
     }
     adc_analyze_buffer(p_buffer);
     *p_frequency = p_buffer->frequency;
+    *p_dc_offset = (p_buffer->dc_offset*100)/4990;
+    *p_vpp = (p_buffer->peak_peak*100)/4990;
     p_buffer->buffer_ready_to_read = 0;
 }
 
