@@ -8,6 +8,9 @@
 /**
  * main.c
  */
+
+static uint8_t mode_is_ac = 1;
+
 #if 0
 // ADC define values for calibration
 #define CALIBRATION_ZERO_TO_ONE_HALF_VOLT 4865
@@ -65,6 +68,7 @@ void main(void)
     uint32_t frequency = 0;
     uint32_t dc_offset = 0;
     uint32_t vpp = 0;
+    uint8_t last_mode_was_ac = mode_is_ac;
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
@@ -75,18 +79,34 @@ void main(void)
     adc_init();
     uart_init();
     timer_a_init();
-    vt100_init();
+    buttons_init();
 
     // enable global interrupts
     __enable_irq();
 
     // continuously read then print values from ADC to UART terminal
     while(1) {
-        adc_get_values(&frequency, &dc_offset, &vpp); // update freq, DC and Vpp from ADC
-        vt100_put_frequency(frequency); // display updated frequency
-        vt100_put_dc_offset(dc_offset); // display updated DC offset
-        vt100_put_vpp(vpp); // display updated Vpp
-        vt100_put_bar(vpp); // update the bar in the bar graph
-        delay_ms(500); // delay for UART send time
+        mode_is_ac = buttons_get_mode_ac();
+        if (last_mode_was_ac != mode_is_ac) {
+            if (mode_is_ac == 1) {
+                vt100_init_ac();
+            }
+            else {
+                vt100_init_dc();
+            }
+            last_mode_was_ac = mode_is_ac;
+        }
+        if (1 == mode_is_ac) {
+            adc_get_values(&frequency, &dc_offset, &vpp); // update freq, DC and Vpp from ADC
+            vt100_put_frequency(frequency); // display updated frequency
+            vt100_put_dc_offset(dc_offset); // display updated DC offset
+            vt100_put_vpp(vpp); // display updated Vpp
+            vt100_put_bar(vpp); // update the bar in the bar graph
+            delay_ms(500); // delay for UART send time
+        }
+        else {
+
+        }
+
     }
 }

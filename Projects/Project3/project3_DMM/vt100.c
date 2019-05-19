@@ -172,7 +172,7 @@ void vt100_bar_graph_scale(void)
 }
 
 // set up the terminal window for DMM using VT-100
-void vt100_init(void)
+void vt100_init_ac(void)
 {
     vt100_clear_screen(); // clears the screen
     uart_put_str(set_80_columns); // 80 column wide mode
@@ -208,3 +208,21 @@ void vt100_init(void)
     vt100_bar_graph_scale();
 }
 
+// set up the terminal window for DMM using VT-100
+void vt100_init_dc(void)
+{
+    vt100_clear_screen(); // clears the screen
+    uart_put_str(set_80_columns); // 80 column wide mode
+    vt100_draw_box();
+    // DMM_mode
+    vt100_set_cursor_position(MODE_LINE,MODE_TEXT_COL_START);
+    uart_put_str("DMM Mode: DC");
+
+    // DC voltage
+    vt100_set_cursor_position(DC_OFFSET_LINE,DC_OFFSET_TEXT_COL_START);
+    uart_put_str("DC Voltage:");
+    vt100_set_cursor_position(DC_OFFSET_LINE,DC_OFFSET_V_COL_START);
+    uart_put_str("V");
+
+    vt100_bar_graph_scale();
+}
