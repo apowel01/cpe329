@@ -8,7 +8,7 @@
 /**
  * main.c
  */
-
+#if 0
 // ADC define values for calibration
 #define CALIBRATION_ZERO_TO_ONE_HALF_VOLT 4865
 #define CALIBRATION_ONE_HALF_TO_ONE_VOLT 4950
@@ -58,6 +58,7 @@ static void put_voltage(uint16_t adc_value)
     uart_put_num(hundredths);
     uart_put_str("V\r\n"); // print 'V' for units of volts and return new line
 }
+#endif
 
 void main(void)
 {
@@ -70,23 +71,22 @@ void main(void)
     // set clock frequency
     delay_set_dco(FREQ_48_0_MHz);
 
-    // init ADC and UART
+    // init ADC, TIMER A, VT-100 terminal and UART
     adc_init();
     uart_init();
     timer_a_init();
     vt100_init();
 
-    // enable interrupts
+    // enable global interrupts
     __enable_irq();
 
     // continuously read then print values from ADC to UART terminal
     while(1) {
-        adc_get_values(&frequency, &dc_offset, &vpp);
-        vt100_put_frequency(frequency);
-        vt100_put_dc_offset(dc_offset);
-        vt100_put_vpp(vpp);
-        vt100_put_bar(vpp);
-        //put_voltage(new_value); // display value to terminal
+        adc_get_values(&frequency, &dc_offset, &vpp); // update freq, DC and Vpp from ADC
+        vt100_put_frequency(frequency); // display updated frequency
+        vt100_put_dc_offset(dc_offset); // display updated DC offset
+        vt100_put_vpp(vpp); // display updated Vpp
+        vt100_put_bar(vpp); // update the bar in the bar graph
         delay_ms(500); // delay for UART send time
     }
 }

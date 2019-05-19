@@ -40,6 +40,7 @@ uint16_t adc_get_value(void)
     return sample_buffers[0].samples[0];
 }
 
+// start new sample with ADC
 void adc_sample_start(void)
 {
     ADC14->CTL0 |= ADC14_CTL0_SC; // start a conversion from A to D
