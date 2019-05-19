@@ -77,6 +77,9 @@ static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
 {
     int i;
     int currently_rising = 0;
+    uint16_t v0;
+    uint16_t v1;
+    uint16_t v2;
 
     // ac - peak to peak voltage, rms voltage, dc offset, frequency
     // find max and min volts
@@ -98,15 +101,21 @@ static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
 
     // find frequency
     p_buffer->frequency = 0;
-    for (i = 0; i < SAMPLES_PER_SECOND; i++) {
+    // we get some erroneous reading at low frequencies, so check
+    // rising or falling for TWO consecutive samples before accepting
+    // direction change
+    v0 =  p_buffer->dc_offset; // reference point, mid-way up the wave
+    for (i = 1; i < SAMPLES_PER_SECOND; i++) {
+        v1 = p_buffer->samples[i];
+        v2 = p_buffer->samples[i-1];
         if (currently_rising == 0) {
-            if (p_buffer->samples[i] > p_buffer->dc_offset) {
+            if ((v1 > v0) && (v2 > v0)) {
                 currently_rising = 1;
                 p_buffer->frequency++;
             }
         }
         else {
-            if (p_buffer->samples[i] < p_buffer->dc_offset) {
+            if ((v1 < v0) && (v2 < v0)) {
                 currently_rising = 0;
             }
         }
