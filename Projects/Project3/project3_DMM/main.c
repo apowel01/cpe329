@@ -61,9 +61,7 @@ static void put_voltage(uint16_t adc_value)
 
 void main(void)
 {
-    uint32_t frequency = 0;
-    uint32_t dc_offset = 0;
-    uint32_t vpp = 0;
+    uint16_t new_value = 0;
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
@@ -81,11 +79,9 @@ void main(void)
 
     // continuously read then print values from ADC to UART terminal
     while(1) {
-        adc_get_values(&frequency, &dc_offset, &vpp);
-        vt100_put_frequency(frequency);
-        vt100_put_dc_offset(dc_offset);
-        vt100_put_vpp(vpp);
-        vt100_put_bar(vpp);
+        //vt100_clear_screen();
+        new_value = adc_get_frequency(); // get the new analog value
+        vt100_put_frequency(new_value);
         //put_voltage(new_value); // display value to terminal
         delay_ms(500); // delay for UART send time
     }
