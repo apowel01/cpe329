@@ -39,6 +39,7 @@ void vt100_set_cursor_position(uint8_t line, uint8_t column)
 
 void vt100_init(void)
 {
+    vt100_clear_screen();
     uart_put_str(set_80_columns);
     vt100_set_cursor_position(FREQ_LINE,FREQ_TEXT_COL_START);
     uart_put_str("frequency");
