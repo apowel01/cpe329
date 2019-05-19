@@ -17,11 +17,14 @@
 typedef struct {
     uint16_t samples[SAMPLES_PER_SECOND];
     uint8_t buffer_ready_to_read;
+    // ac values
     uint16_t max_volts;
     uint16_t min_volts;
     uint16_t frequency;
     uint16_t dc_offset;
     uint16_t peak_peak;
+    // dc values
+    uint32_t dc_volts;
 } sample_buffer_t;
 
 // local file variables
@@ -70,7 +73,7 @@ void ADC14_IRQHandler(void)
     }
 }
 
-static void adc_analyze_buffer(sample_buffer_t *p_buffer)
+static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
 {
     int i;
     int currently_rising = 0;
@@ -111,7 +114,7 @@ static void adc_analyze_buffer(sample_buffer_t *p_buffer)
 }
 
 // determine input waveform frequency
-void adc_get_values(uint32_t *p_frequency, uint32_t *p_dc_offset, uint32_t *p_vpp)
+void adc_get_values_ac(uint32_t *p_frequency, uint32_t *p_dc_offset, uint32_t *p_vpp)
 {
     uint32_t my_buffer = 0;
     sample_buffer_t *p_buffer = &sample_buffers[my_buffer];
@@ -124,10 +127,41 @@ void adc_get_values(uint32_t *p_frequency, uint32_t *p_dc_offset, uint32_t *p_vp
         }
         p_buffer = &sample_buffers[my_buffer];
     }
-    adc_analyze_buffer(p_buffer);
+    adc_analyze_buffer_ac(p_buffer);
     *p_frequency = p_buffer->frequency;
     *p_dc_offset = (p_buffer->dc_offset*100)/4990;
     *p_vpp = (p_buffer->peak_peak*100)/4990;
+    p_buffer->buffer_ready_to_read = 0;
+}
+
+// analyze dc buffer values
+static void adc_analyze_buffer_dc(sample_buffer_t *p_buffer)
+{
+    int i;
+    // average over a period of less than 0.1s
+    p_buffer->dc_volts = 0;
+    for (i = 0; i < ((SAMPLES_PER_SECOND / 10) - 1); i++) {
+        p_buffer->dc_volts += p_buffer->samples[i];
+    }
+    p_buffer->dc_volts /= ((SAMPLES_PER_SECOND / 10) - 1);
+}
+
+// determine input waveform frequency
+void adc_get_values_dc(uint32_t *p_dc_volts)
+{
+    uint32_t my_buffer = 0;
+    sample_buffer_t *p_buffer = &sample_buffers[my_buffer];
+
+    // look for a full buffer
+    while (0 == p_buffer->buffer_ready_to_read) {
+        my_buffer++;
+        if (NUM_BUFFERS == my_buffer) {
+            my_buffer = 0;
+        }
+        p_buffer = &sample_buffers[my_buffer];
+    }
+    adc_analyze_buffer_dc(p_buffer);
+    *p_dc_volts = (p_buffer->dc_volts*100)/4990;
     p_buffer->buffer_ready_to_read = 0;
 }
 

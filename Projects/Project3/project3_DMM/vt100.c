@@ -84,6 +84,15 @@ void vt100_put_dc_offset(uint32_t value)
     vt100_put_num_2_decimals(value);
 }
 
+// update DC volts to terminal
+void vt100_put_dc_volts(uint32_t value)
+{
+    vt100_set_cursor_position(DC_OFFSET_LINE,DC_OFFSET_VALUE_COL_START);
+    uart_put_str("    "); // clear value space
+    vt100_set_cursor_position(DC_OFFSET_LINE,DC_OFFSET_VALUE_COL_START);
+    vt100_put_num_2_decimals(value);
+}
+
 // update Vpp to terminal
 void vt100_put_vpp(uint32_t value)
 {

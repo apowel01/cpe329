@@ -15,6 +15,6 @@ void vt100_put_frequency(uint32_t value);
 void vt100_put_dc_offset(uint32_t value);
 void vt100_put_vpp(uint32_t value);
 void vt100_put_bar(uint32_t value);
-
+void vt100_put_dc_volts(uint32_t value);
 
 #endif /* VT100_H_ */
