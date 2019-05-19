@@ -85,6 +85,7 @@ void main(void)
         vt100_put_frequency(frequency);
         vt100_put_dc_offset(dc_offset);
         vt100_put_vpp(vpp);
+        vt100_put_bar(vpp);
         //put_voltage(new_value); // display value to terminal
         delay_ms(500); // delay for UART send time
     }

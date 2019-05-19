@@ -121,6 +121,47 @@ void vt100_draw_box(void)
 
 }
 
+#define AXIS_LINE 10
+#define GRAPH_START 5
+#define GRAPH_END (GRAPH_START+33)
+#define SCALE_LINE (AXIS_LINE+1)
+#define BAR_LINE (AXIS_LINE-1)
+
+void vt100_put_bar(uint32_t value)
+{
+    int i;
+
+    vt100_set_cursor_position(BAR_LINE,GRAPH_START);
+    for(i=GRAPH_START; i < GRAPH_END; i++) {
+        uart_put_char(' ');
+    }
+
+    vt100_set_cursor_position(BAR_LINE,GRAPH_START);
+    for(i=GRAPH_START; i < GRAPH_START+(value/10); i++) {
+        uart_put_char('#');
+    }
+}
+
+void vt100_bar_graph_scale(void)
+{
+    int i;
+
+    vt100_set_cursor_position(AXIS_LINE,GRAPH_START);
+
+    for(i=GRAPH_START; i < GRAPH_END; i++) {
+        uart_put_char('_');
+    }
+    vt100_set_cursor_position(SCALE_LINE,GRAPH_START);
+    uart_put_char('0');
+    vt100_set_cursor_position(SCALE_LINE,GRAPH_START+10);
+    uart_put_char('1');
+    vt100_set_cursor_position(SCALE_LINE,GRAPH_START+20);
+    uart_put_char('2');
+    vt100_set_cursor_position(SCALE_LINE,GRAPH_START+30);
+    uart_put_char('3');
+}
+
+
 void vt100_init(void)
 {
     vt100_clear_screen(); // clears the screen
@@ -153,6 +194,8 @@ void vt100_init(void)
     uart_put_str("Frequency:");
     vt100_set_cursor_position(FREQ_LINE,FREQ_HZ_COL_START);
     uart_put_str("Hz");
+
+    vt100_bar_graph_scale();
 }
 
 
