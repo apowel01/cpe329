@@ -8,6 +8,7 @@
 #include "delay.h"
 #include "uart.h"
 #include "adc.h"
+#include "math.h"
 // defines
 #define SAMPLES_PER_SECOND 16000 // 16 samples / period at 1kHz
 #define NUM_BUFFERS 2
@@ -23,6 +24,7 @@ typedef struct {
     uint16_t frequency;
     uint16_t dc_offset;
     uint16_t peak_peak;
+    uint32_t rms_volts;
     // dc values
     uint32_t dc_volts;
 } sample_buffer_t;
@@ -77,9 +79,13 @@ static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
 {
     int i;
     int currently_rising = 0;
+<<<<<<< HEAD
     uint16_t v0;
     uint16_t v1;
     uint16_t v2;
+=======
+    uint64_t tmp_rms_volts = 0;
+>>>>>>> ad2a73ac2745bc938a3c1233a541bca280e7a6e7
 
     // ac - peak to peak voltage, rms voltage, dc offset, frequency
     // find max and min volts
@@ -95,6 +101,14 @@ static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
     }
     // find peak to peak voltage
     p_buffer->peak_peak = p_buffer->max_volts - p_buffer->min_volts;
+
+    // find true rms voltage
+    p_buffer->rms_volts = 0;
+    for (i = 0; i < ((SAMPLES_PER_SECOND / 10) - 1); i++) {
+        tmp_rms_volts += (p_buffer->samples[i] * p_buffer->samples[i]); // sum the squares
+    }
+    tmp_rms_volts /= ((SAMPLES_PER_SECOND / 10) - 1); // take the mean of the squares
+    p_buffer->rms_volts = (uint32_t)(sqrt(tmp_rms_volts)); // root of the mean of the squares
 
     // find DC offset
     p_buffer->dc_offset = p_buffer->min_volts + (p_buffer->peak_peak / 2);
@@ -123,7 +137,7 @@ static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
 }
 
 // determine input waveform frequency
-void adc_get_values_ac(uint32_t *p_frequency, uint32_t *p_dc_offset, uint32_t *p_vpp)
+void adc_get_values_ac(uint32_t *p_frequency, uint32_t *p_dc_offset, uint32_t *p_vpp, uint32_t *p_rms_volts)
 {
     uint32_t my_buffer = 0;
     sample_buffer_t *p_buffer = &sample_buffers[my_buffer];
@@ -138,8 +152,9 @@ void adc_get_values_ac(uint32_t *p_frequency, uint32_t *p_dc_offset, uint32_t *p
     }
     adc_analyze_buffer_ac(p_buffer);
     *p_frequency = p_buffer->frequency;
-    *p_dc_offset = (p_buffer->dc_offset*100)/4990;
+    *p_dc_offset = (p_buffer->dc_offset*100)/4990; // *AMP
     *p_vpp = (p_buffer->peak_peak*100)/4990;
+    *p_rms_volts = (p_buffer->rms_volts*100)/4990;
     p_buffer->buffer_ready_to_read = 0;
 }
 
