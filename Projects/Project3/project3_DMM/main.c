@@ -79,10 +79,10 @@ void main(void)
 
     // continuously read then print values from ADC to UART terminal
     while(1) {
-        vt100_clear_screen();
+        //vt100_clear_screen();
         new_value = adc_get_frequency(); // get the new analog value
-        vt100_set_cursor_position(10,10);
-        put_voltage(new_value); // display value to terminal
+        vt100_put_frequency(new_value);
+        //put_voltage(new_value); // display value to terminal
         delay_ms(500); // delay for UART send time
     }
 }
