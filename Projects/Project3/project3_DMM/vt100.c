@@ -208,4 +208,3 @@ void vt100_init(void)
     vt100_bar_graph_scale();
 }
 
-
