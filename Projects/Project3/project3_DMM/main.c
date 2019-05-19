@@ -73,7 +73,7 @@ void main(void)
     uart_init();
     timer_a_init();
     vt100_init();
-
+    vt100_box();
     // enable interrupts
     __enable_irq();
 
