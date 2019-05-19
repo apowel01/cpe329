@@ -198,21 +198,3 @@ void vt100_init(void)
     vt100_bar_graph_scale();
 }
 
-void vt100_box(void)
-{
-    vt100_clear_screen();
-    uart_put_str(set_80_columns);
-    vt100_set_cursor_position(BOX_TOP,BOX_HOME);
-
-    for(i = 0; i <= BOX_END; i++)
-    {
-        vt100_set_cursor_position(BOX_TOP,);
-        uart_put_num(i);
-
-    }
- /*   for(i = 0; i ; i++)
-    {
-        vt100_set_cursor_position()
-    }
-    */
-}
