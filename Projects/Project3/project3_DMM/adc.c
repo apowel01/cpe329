@@ -17,7 +17,11 @@
 typedef struct {
     uint16_t samples[SAMPLES_PER_SECOND];
     uint8_t buffer_ready_to_read;
-
+    uint16_t max_volts;
+    uint16_t min_volts;
+    uint16_t frequency;
+    uint16_t dc_offset;
+    uint16_t peak_peak;
 } sample_buffer_t;
 
 // local file variables
@@ -65,12 +69,49 @@ void ADC14_IRQHandler(void)
     }
 }
 
-// determine input waveform frequency
-uint32_t adc_get_frequency(void)
+static void adc_analyze_buffer(sample_buffer_t *p_buffer)
 {
     int i;
-    uint32_t num_rising_edges = 0;
     int currently_rising = 0;
+
+    // ac - peak to peak voltage, rms voltage, dc offset, frequency
+    // find max and min volts
+    p_buffer->max_volts = p_buffer->samples[0];
+    p_buffer->min_volts = p_buffer->samples[0];
+    for (i = 1; i < SAMPLES_PER_SECOND; i++) {
+        if (p_buffer->max_volts < p_buffer->samples[i]) {
+            p_buffer->max_volts = p_buffer->samples[i];
+        }
+        if (p_buffer->min_volts > p_buffer->samples[i]) {
+            p_buffer->min_volts = p_buffer->samples[i];
+        }
+    }
+    // find peak to peak voltage
+    p_buffer->peak_peak = p_buffer->max_volts - p_buffer->min_volts;
+
+    // find DC offset
+    p_buffer->dc_offset = p_buffer->min_volts + (p_buffer->peak_peak / 2);
+
+    // find frequency
+    p_buffer->frequency = 0;
+    for (i = 0; i < SAMPLES_PER_SECOND; i++) {
+        if (currently_rising == 0) {
+            if (p_buffer->samples[i] > p_buffer->dc_offset) {
+                currently_rising = 1;
+                p_buffer->frequency++;
+            }
+        }
+        else {
+            if (p_buffer->samples[i] < p_buffer->dc_offset) {
+                currently_rising = 0;
+            }
+        }
+    }
+}
+
+// determine input waveform frequency
+void adc_get_values(uint32_t *p_frequency)
+{
     uint32_t my_buffer = 0;
     sample_buffer_t *p_buffer = &sample_buffers[my_buffer];
 
@@ -82,23 +123,9 @@ uint32_t adc_get_frequency(void)
         }
         p_buffer = &sample_buffers[my_buffer];
     }
-    // count rising edges
-    for (i = 1; i < SAMPLES_PER_SECOND; i++) {
-        if (currently_rising == 0) {
-            if (p_buffer->samples[i-1] < p_buffer->samples[i]) {
-                currently_rising = 1;
-                num_rising_edges++;
-            }
-        }
-        else {
-            if (p_buffer->samples[i-1] > p_buffer->samples[i]) {
-                currently_rising = 0;
-            }
-        }
-    }
-
+    adc_analyze_buffer(p_buffer);
+    *p_frequency = p_buffer->frequency;
     p_buffer->buffer_ready_to_read = 0;
-    return num_rising_edges;
 }
 
 // initialize the adc
