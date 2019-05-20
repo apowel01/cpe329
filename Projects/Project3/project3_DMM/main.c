@@ -70,7 +70,7 @@ void main(void)
     uint32_t vpp = 0;
     uint32_t dc_volts = 0;
     uint32_t rms_volts = 0;
-    uint8_t last_mode_was_ac = mode_is_ac;
+    uint8_t last_mode_was_ac = ~mode_is_ac;
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
@@ -103,7 +103,7 @@ void main(void)
             vt100_put_frequency(frequency); // display updated frequency
             vt100_put_dc_offset(dc_offset); // display updated DC offset
             vt100_put_vpp(vpp); // display updated Vpp
-            vt100_put_bar(vpp); // update the bar in the bar graph
+            vt100_put_bar(rms_volts); // update the bar in the bar graph with true-rms
             vt100_put_rms_volts(rms_volts); // update rms
         }
         else {

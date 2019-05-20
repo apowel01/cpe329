@@ -79,13 +79,10 @@ static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
 {
     int i;
     int currently_rising = 0;
-<<<<<<< HEAD
     uint16_t v0;
     uint16_t v1;
     uint16_t v2;
-=======
     uint64_t tmp_rms_volts = 0;
->>>>>>> ad2a73ac2745bc938a3c1233a541bca280e7a6e7
 
     // ac - peak to peak voltage, rms voltage, dc offset, frequency
     // find max and min volts
@@ -104,10 +101,10 @@ static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
 
     // find true rms voltage
     p_buffer->rms_volts = 0;
-    for (i = 0; i < ((SAMPLES_PER_SECOND / 10) - 1); i++) {
+    for (i = 0; i < SAMPLES_PER_SECOND; i++) {
         tmp_rms_volts += (p_buffer->samples[i] * p_buffer->samples[i]); // sum the squares
     }
-    tmp_rms_volts /= ((SAMPLES_PER_SECOND / 10) - 1); // take the mean of the squares
+    tmp_rms_volts /= SAMPLES_PER_SECOND; // take the mean of the squares
     p_buffer->rms_volts = (uint32_t)(sqrt(tmp_rms_volts)); // root of the mean of the squares
 
     // find DC offset
