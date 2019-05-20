@@ -118,6 +118,7 @@ void uart_put_num(uint32_t value)
     //int digits = 0;
     int next_digit;
     int mult = 0;
+    int i;
 
     for (str_pos = 0; str_pos < 20; str_pos++) {
         string[str_pos] = 0;
@@ -137,7 +138,8 @@ void uart_put_num(uint32_t value)
         while (num_digits > 0) {
             next_digit = value;
             mult = 1;
-            while (next_digit > 9) {
+            for (i=1; i < num_digits; i++) {
+//            while (next_digit > 9) {
                 next_digit /= 10;
                 mult *= 10;
             }
