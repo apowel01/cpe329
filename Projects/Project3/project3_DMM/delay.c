@@ -9,7 +9,7 @@
 
 static int dco_frequency = FREQ_3_0_MHz; // the board default value
 
-/* Transition to VCORE Level 1: AM0_LDO --> AM1_LDO */
+// Transition to VCORE Level 1: AM0_LDO --> AM1_LDO
 void set_Vcore_level_1(void)
 {
     while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
@@ -17,6 +17,7 @@ void set_Vcore_level_1(void)
     while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
 }
 
+// configure flash wait state
 void set_flash_cntrl_wait_48_MHz(void)
 {
     /* Configure Flash wait-state to 1 for both banks 0 & 1 */
@@ -24,12 +25,10 @@ void set_flash_cntrl_wait_48_MHz(void)
     FLCTL->BANK1_RDCTL = (FLCTL->BANK0_RDCTL & ~(FLCTL_BANK1_RDCTL_WAIT_MASK)) | FLCTL_BANK1_RDCTL_WAIT_1;
 }
 
-
-// Set DCO frequency to desired value
+// Set DCO frequency to desired frequency value
 // includes init
 void delay_set_dco(int freq)
 {
-    // change DC0 from default of 3MHz to 12MHz.
     CS->KEY = CS_KEY_VAL; // unlock CS registers
     CS->CTL0 = 0; // clear register
 
@@ -62,6 +61,7 @@ void delay_set_dco(int freq)
     CS->KEY = 0; // lock the CS registers
 }
 
+// return DCO frequency
 uint32_t delay_get_dco_freq(void)
 {
     uint32_t frequency = 0;
@@ -88,42 +88,9 @@ uint32_t delay_get_dco_freq(void)
     return frequency;
 }
 
+// delay with int micro-seconds
 void delay_us(int us)
 {
- //   int count;
-
-#if 0
-    int iterations;
-    if (dco_frequency == FREQ_1_5_MHz) {
-        iterations = (us * 3) / 2;
-        for (count = 0; count < iterations; count++) {
-        }
-    }
-    else if (dco_frequency == FREQ_3_0_MHz) {
-        iterations = (us * 3) - 60;
-        for (count = 0; count < iterations; count++) {
-        }
-    }
-    else {
-        for (count = 0; count < us; count++)
-        {
-            switch (dco_frequency) {
-            case FREQ_6_0_MHz:
- //               _delay_cycles(1);
-                break;
-            case FREQ_12_0_MHz:
-                _delay_cycles(1);
-                break;
-            case FREQ_24_0_MHz:
-                _delay_cycles(6);
-                break;
-            case FREQ_48_0_MHz:
-                _delay_cycles(48);
-                break;
-            }
-        }
-    }
-#else
     int j;
     if(dco_frequency == FREQ_1_5_MHz)
     {
@@ -149,13 +116,9 @@ void delay_us(int us)
     {
      for(j = 0; j < us/10 + 90; j++);
     }
-
-//    count = ((us * dco_frequency) / 80);
-//    while (count-- > 0) {
-//    }
-#endif
 }
 
+// delay with milli seconds
 void delay_ms(int ms)
 {
     int count;
@@ -186,6 +149,7 @@ void delay_ms(int ms)
     }
 }
 
+// delay by n seconds
 void delay_sec(int sec)
 {
     int count;
@@ -212,6 +176,5 @@ void delay_sec(int sec)
             _delay_cycles(48000000);
             break;
         }
-
     }
 }

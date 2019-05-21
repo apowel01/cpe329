@@ -12,14 +12,16 @@
 // buttons are shorts to ground when pressed
 // since both buttons are connected to port 1, both will run the same ISR
 #include "msp.h"
-
+// handle AC/DC mode
 static uint8_t mode_is_ac = 1;
 
+// return if AC is the current mode
 uint8_t buttons_get_mode_ac(void)
 {
     return mode_is_ac;
 }
 
+// Port1 IRQ Handler for buttons 1 & 2 (left and right)
 void PORT1_IRQHandler(void)
 {
     if (P1->IFG & BIT1) {
@@ -34,6 +36,7 @@ void PORT1_IRQHandler(void)
     }
 }
 
+// initialize GPIO and interrupts for buttons 1 & 2
 void buttons_init(void)
 {
     // set up right and left buttons as interrupts

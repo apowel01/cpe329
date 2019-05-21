@@ -19,6 +19,9 @@
 // baud rate values
 #define BRW_FOR_48_MHZ 26
 #define BRF_FOR_48_MHZ 0
+// values to manage UART read
+static uint16_t read_value = 0;
+static uint8_t ready_to_read = READY_FLAG_NOT_READY;
 
 // Initialize the UART
 void uart_init(void)
@@ -64,8 +67,7 @@ void uart_put_str(char * p_str)
     }
 }
 
-static uint16_t read_value = 0;
-static uint8_t ready_to_read = READY_FLAG_NOT_READY;
+// read from the UART buffer
 uint16_t uart_get_value(void)
 {
     uint16_t tvalue;
@@ -77,7 +79,7 @@ uint16_t uart_get_value(void)
     return tvalue; // cast receive buffer as char
 }
 
-// Basic receive IRQ handler
+// Basic UART receive IRQ handler
 void EUSCIA0_IRQHandler(void)
 {
     static uint16_t isr_value = 0;
@@ -115,15 +117,14 @@ void uart_put_num(uint32_t value)
     int num_digits;
     char string[20];
     int str_pos = 0;
-    //int digits = 0;
     int next_digit;
     int mult = 0;
     int i;
-
+    // clear the output buffer
     for (str_pos = 0; str_pos < 20; str_pos++) {
         string[str_pos] = 0;
     }
-
+    // handle zero case
     if (0 == value) {
         string[0] = 0x30;
     }
@@ -131,15 +132,16 @@ void uart_put_num(uint32_t value)
         str_pos = 0;
         next_digit = value;
         num_digits = 0;
+        // work out how many digits are in the number
         while (next_digit > 0) {
             next_digit /= 10;
             num_digits++;
         }
+        // put the digits in the string
         while (num_digits > 0) {
             next_digit = value;
             mult = 1;
             for (i=1; i < num_digits; i++) {
-//            while (next_digit > 9) {
                 next_digit /= 10;
                 mult *= 10;
             }
@@ -149,29 +151,5 @@ void uart_put_num(uint32_t value)
             num_digits--;
         }
     }
-
-    uart_put_str(string);
+    uart_put_str(string); // send string to UART
 }
-
-#if 0 // *AMP
-void uart_main(void)
-{
-    uint16_t inValue;
-    delay_set_dco(FREQ_3_0_MHz);
-
-    WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
-
-    dac_init();
-    uart_init();
-
-    while(1) {
-        inValue = uart_get_value();
-        if (inValue < 4096) {
-            dac_send(inValue);
-        }
-        else {
-            uart_put_str("ERROR: number out of range");
-        }
-    }
-}
-#endif
