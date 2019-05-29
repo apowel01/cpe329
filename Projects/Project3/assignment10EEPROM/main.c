@@ -54,16 +54,16 @@ int main(void) {
 
     WriteEEPROM(0x1122, 0x21);
 
-    for (i=4000; i > 0; i--)             //Delay for EEPROM write cycle(5ms)
+    for (i=4000; i > 0; i--);             //Delay for EEPROM write cycle(5ms)
 
-    values = ReadEEPROM(0x1122);                // Read value from EEPROM
+    value = ReadEEPROM(0x1122);                // Read value from EEPROM
 
     P2->OUT |= (value & (BIT2 | BIT1 | BIT0));  // Set LED2 With 3 LSB of Value
 
     __sleep();          // go to lower Power mode
     }
 
-void InitEEPROM(uint8_t DeviceAddress); {
+void InitEEPROM(uint8_t DeviceAddress) {
 
     P1->SEL0 |= BIT6 | BIT7;           // Set I2C pins of eUSCI_B0
 
