@@ -9,12 +9,13 @@
 #include "uart.h"
 #include "adc.h"
 #include "math.h"
+
 // defines
 #define SAMPLES_PER_SECOND 16000 // 16 samples / period at 1kHz
-#define NUM_BUFFERS 2
-#define BUFFER_0 0
-#define BUFFER_1 1
+#define NUM_BUFFERS 2 // use two buffers: fill one while analyzing other
+#define CALIBRATION_CONSTANT 4990 // ADC calibration factor
 
+// buffer type definition
 typedef struct {
     uint16_t samples[SAMPLES_PER_SECOND];
     uint8_t buffer_ready_to_read;
@@ -34,6 +35,7 @@ static sample_buffer_t sample_buffers[NUM_BUFFERS]; // create sample array
 static uint16_t current_sample = 0;
 static uint8_t current_buffer = 0;
 
+// returns amount of samples per second
 uint32_t adc_get_samples_per_second(void)
 {
     return SAMPLES_PER_SECOND;
@@ -58,14 +60,15 @@ void ADC14_IRQHandler(void)
 
     // read conversion value
     value = ADC14->MEM[2]; // reading auto clears interrupt flag
+    // only fill sample buffer if we are not analyzing it
     if (0 == sample_buffers[current_buffer].buffer_ready_to_read) {
         sample_buffers[current_buffer].samples[current_sample] = value;
         current_sample++;
-        if (current_sample == SAMPLES_PER_SECOND) {
+        if (current_sample == SAMPLES_PER_SECOND) { // buffer full
             current_sample = 0;
             sample_buffers[current_buffer].buffer_ready_to_read = 1;
-            current_buffer++;
-            if (NUM_BUFFERS == current_buffer) {
+            current_buffer++; // go to next buffer
+            if (NUM_BUFFERS == current_buffer) { // reset to buffer 0
                 current_buffer = 0;
             }
         }
@@ -75,14 +78,14 @@ void ADC14_IRQHandler(void)
     }
 }
 
+// analyze buffer for AC values
 static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
 {
-    int i;
-    int currently_rising = 0;
-    uint16_t v0;
+    int i; // for running through sample buffer index
+    int currently_rising = 0; // flag to track if the waveform is rising
+    uint16_t v0; // variables for frequency evaluation
     uint16_t v1;
     uint16_t v2;
-    uint64_t tmp_rms_volts = 0;
 
     // ac - peak to peak voltage, rms voltage, dc offset, frequency
     // find max and min volts
@@ -99,23 +102,19 @@ static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
     // find peak to peak voltage
     p_buffer->peak_peak = p_buffer->max_volts - p_buffer->min_volts;
 
-    // find true rms voltage
-    p_buffer->rms_volts = 0;
-    for (i = 0; i < SAMPLES_PER_SECOND; i++) {
-        tmp_rms_volts += (p_buffer->samples[i] * p_buffer->samples[i]); // sum the squares
-    }
-    tmp_rms_volts /= SAMPLES_PER_SECOND; // take the mean of the squares
-    p_buffer->rms_volts = (uint32_t)(sqrt(tmp_rms_volts)); // root of the mean of the squares
-
     // find DC offset
     p_buffer->dc_offset = p_buffer->min_volts + (p_buffer->peak_peak / 2);
 
+    // find true rms voltage
+    // rms = sqrt((Vpp/2)^2 + Vdc_offset^2)
+    p_buffer->rms_volts = sqrt((p_buffer->peak_peak / 2) * (p_buffer->peak_peak / 2) + (p_buffer->dc_offset * p_buffer->dc_offset));
+
     // find frequency
-    p_buffer->frequency = 0;
+    p_buffer->frequency = 0; // initialize to 0
     // we get some erroneous reading at low frequencies, so check
     // rising or falling for TWO consecutive samples before accepting
     // direction change
-    v0 =  p_buffer->dc_offset; // reference point, mid-way up the wave
+    v0 = p_buffer->dc_offset; // reference point for slope sign change, mid-way up the wave
     for (i = 1; i < SAMPLES_PER_SECOND; i++) {
         v1 = p_buffer->samples[i];
         v2 = p_buffer->samples[i-1];
@@ -131,9 +130,28 @@ static void adc_analyze_buffer_ac(sample_buffer_t *p_buffer)
             }
         }
     }
+    // adjust for calibration of frequency values
+    if (p_buffer->frequency > 890) {
+        p_buffer->frequency += 5;
+    }
+    else if (p_buffer->frequency > 690) {
+        p_buffer->frequency += 4;
+    }
+    else if (p_buffer->frequency > 590) {
+        p_buffer->frequency += 3;
+    }
+    else if (p_buffer->frequency > 390) {
+        p_buffer->frequency += 2;
+    }
+    else if (p_buffer->frequency > 290) {
+        p_buffer->frequency += 1;
+    }
+    else {
+        // no adjustment needed
+    }
 }
 
-// determine input waveform frequency
+// return AC values for printing
 void adc_get_values_ac(uint32_t *p_frequency, uint32_t *p_dc_offset, uint32_t *p_vpp, uint32_t *p_rms_volts)
 {
     uint32_t my_buffer = 0;
@@ -149,13 +167,13 @@ void adc_get_values_ac(uint32_t *p_frequency, uint32_t *p_dc_offset, uint32_t *p
     }
     adc_analyze_buffer_ac(p_buffer);
     *p_frequency = p_buffer->frequency;
-    *p_dc_offset = (p_buffer->dc_offset*100)/4990; // *AMP
-    *p_vpp = (p_buffer->peak_peak*100)/4990;
-    *p_rms_volts = (p_buffer->rms_volts*100)/4990;
-    p_buffer->buffer_ready_to_read = 0;
+    *p_dc_offset = (p_buffer->dc_offset*100)/CALIBRATION_CONSTANT; // *100 to prevent floating point
+    *p_vpp = (p_buffer->peak_peak*100)/CALIBRATION_CONSTANT;
+    *p_rms_volts = (p_buffer->rms_volts*100)/CALIBRATION_CONSTANT;
+    p_buffer->buffer_ready_to_read = 0; // done with values, give buffer to IRQ
 }
 
-// analyze dc buffer values
+// analyze DC buffer values
 static void adc_analyze_buffer_dc(sample_buffer_t *p_buffer)
 {
     int i;
@@ -167,7 +185,7 @@ static void adc_analyze_buffer_dc(sample_buffer_t *p_buffer)
     p_buffer->dc_volts /= ((SAMPLES_PER_SECOND / 10) - 1);
 }
 
-// determine input waveform frequency
+// return DC values for printing
 void adc_get_values_dc(uint32_t *p_dc_volts)
 {
     uint32_t my_buffer = 0;
@@ -182,8 +200,8 @@ void adc_get_values_dc(uint32_t *p_dc_volts)
         p_buffer = &sample_buffers[my_buffer];
     }
     adc_analyze_buffer_dc(p_buffer);
-    *p_dc_volts = (p_buffer->dc_volts*100)/4990;
-    p_buffer->buffer_ready_to_read = 0;
+    *p_dc_volts = (p_buffer->dc_volts*100)/CALIBRATION_CONSTANT;
+    p_buffer->buffer_ready_to_read = 0; // give buffer back to IRQ
 }
 
 // initialize the adc
