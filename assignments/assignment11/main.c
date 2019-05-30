@@ -22,14 +22,10 @@ void main(void) {
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
-    // Initialize GPIO for Pulse as low set as output
+    delay_set_dco(FREQ_3_0_MHz); // set DCO to 3MHz
+    timer_a_init();
+    keypadinit();
 
-    P2->DIR |= BIT4; // Enable GPIO out on pin ___
-    P2->SEL0 &= ~BIT4;
-    P2->SEL1 |= BIT4;
-
-    timer_a_init(); //Initialize timer
-    keypadinit(); //
 
     __enable_irq();
 
