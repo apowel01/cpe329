@@ -49,7 +49,7 @@ void main(void) {
         }
         else {
             degrees = keypad_get_number(1);
-            degrees += digit*10
+            degrees += digit*10;
         }
         timer_A_PWM_set(degrees);
     }
