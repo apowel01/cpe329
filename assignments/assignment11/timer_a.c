@@ -15,13 +15,13 @@
 void TA0_0_IRQHandler(void)
 {
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
-    P2->OUT |= BIT5;
+    P5->OUT |= BIT6;
 }
 
 void TA0_N_IRQHandler(void)
 {
     TIMER_A0->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG; // clear interrupt flag
-    P2->OUT &= ~BIT5;
+    P5->OUT &= ~BIT6;
 
 }
 
@@ -30,7 +30,7 @@ void TA0_N_IRQHandler(void)
 // initalize Timer A - correct rate is clock freq / # samples req'd in a second.
 void timer_a_init(void)
 {
-    P2->DIR |= BIT5;  // GPIO bits, 0 == 25KHz clock, 1 = IRQ execution time
+    P5->DIR |= BIT6;  // GPIO bits, 0 == 25KHz clock, 1 = IRQ execution time
 
 
       TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA

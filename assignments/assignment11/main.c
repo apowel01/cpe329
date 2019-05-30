@@ -17,8 +17,9 @@
 
 void main(void) {
 
-    uint8_t digit = 0;
+    int digit = 0;
     uint16_t degrees = 90;
+    uint16_t new_degrees = degrees;
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
@@ -31,23 +32,30 @@ void main(void) {
 
     // create a pulse signal with a 1.5ms pulse and 20 ms period using a TimerA output
     // 7.5% duty cycle
+
+    timer_A_PWM_set(degrees); // Set PWM to initial value
+
     while(1) {
         digit = keypad_get_digit();
         if (digit == KEYPAD_STAR) {
             if (degrees >= 10) {
-                degrees -= 10;
+                new_degrees = degrees - 10;
             }
         }
         else if (digit == KEYPAD_HASH) {
             if (degrees <= 170) {
-                degrees += 10;
+                new_degrees = degrees + 10;
             }
         }
         else {
-            degrees = keypad_get_number(1);
-            degrees += digit*10;
+            new_degrees = keypad_get_number(1);
+            new_degrees += digit*10;
+
         }
-        timer_A_PWM_set(degrees);
+        if (new_degrees <= 18) {
+            degrees = new_degrees;
+            timer_A_PWM_set(degrees);
+        }
     }
 
 
