@@ -40,6 +40,7 @@ void main(void) {
         if (digit == KEYPAD_STAR) {
             if (degrees >= 1) {
                 new_degrees = degrees - 1;
+
             }
         }
         else if (digit == KEYPAD_HASH) {

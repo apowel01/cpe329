@@ -9,8 +9,8 @@
 #include "msp.h"
 
 #define PULSE_PERIOD 0xEA60  // 20 ms
-#define PULSE_BASE 3000      // 1 ms
-#define PULSE_INCREMENT 167  // 10 degrees
+#define PULSE_BASE 1660      // 1 ms        1660
+#define PULSE_INCREMENT 310  // 10 degrees  310
 
 void TA0_0_IRQHandler(void)
 {
