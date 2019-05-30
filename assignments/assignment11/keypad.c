@@ -119,7 +119,7 @@ int keypad_get_number(uint8_t digits)
             delay_ms(50);
             continue;
         }
-        if (key == 10) {
+        if (key == 11) {
             key = 0;
         }
         if (key <= 9) {

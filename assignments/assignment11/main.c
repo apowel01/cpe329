@@ -18,7 +18,7 @@
 void main(void) {
 
     int digit = 0;
-    uint16_t degrees = 90;
+    uint16_t degrees = 9;
     uint16_t new_degrees = degrees;
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
@@ -38,13 +38,13 @@ void main(void) {
     while(1) {
         digit = keypad_get_digit();
         if (digit == KEYPAD_STAR) {
-            if (degrees >= 10) {
-                new_degrees = degrees - 10;
+            if (degrees >= 1) {
+                new_degrees = degrees - 1;
             }
         }
         else if (digit == KEYPAD_HASH) {
-            if (degrees <= 170) {
-                new_degrees = degrees + 10;
+            if (degrees <= 17) {
+                new_degrees = degrees + 1;
             }
         }
         else {
