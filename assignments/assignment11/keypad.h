@@ -17,6 +17,6 @@ char keypad_getkey(void);
 char keypad_get_ascii(void);
 int keypad_get_number(uint8_t digits);
 int keypad_get_digit(void);
-int timer_A_PWM_set(uint16_t degrees);
+void timer_A_PWM_set(uint16_t degrees);
 
 #endif /* KEYPAD_H_ */
