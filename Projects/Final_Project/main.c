@@ -108,17 +108,17 @@ void main(void) {
 
     for (i=4000; i > 0; i--)             //Delay for EEPROM write cycle(5ms)
 
-        redvalues = ReadPmod(PMOD_RED_LOW);                // Read lower byte red values from Pmod
+        redvalues = ReadPmod(PMOD_RED_ADDR_LOW);                // Read lower byte red values from Pmod
     redvalues =
 
 
-            bluevalues = ReadPmod(PMOD_BLUE_LOW);                // Read blue values from Pmod
+            bluevalues = ReadPmod(PMOD_BLUE_ADDR_LOW);                // Read blue values from Pmod
 
 
-    greenvalues = ReadPmod(PMOD_GREEN_LOW);               // Read green values from Pmod
+    greenvalues = ReadPmod(PMOD_GREEN_ADDR_LOW);               // Read green values from Pmod
 
 
-    clearvalues = ReadPmod(PMOD_CLEAR_LOW);               // Read clear values from Pmod
+    clearvalues = ReadPmod(PMOD_CLEAR_ADDR_LOW);               // Read clear values from Pmod
 
     P2->OUT |= (redvalues & (BIT2 | BIT1 | BIT0));  // Set LED2 With 3 LSB of Value
     for (i=4000; i > 0; i--)             //wait before changing LED
