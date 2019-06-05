@@ -1,37 +1,10 @@
 #if 0
 /*
- * color.c
+ * main.c
  *
- *  Created on: Jun 3, 2019
- *      Author: Amberley
+ *  Created on: May 31, 2019
+ *      Author: Andy Hunt
  */
-
-//******************************************************************************
-//  CPE 329 - Assignment 9
-//
-//  Description: This demo connects an MSP432 to a Microchip 24LC256 EEPROM via
-//  the I2C bus. The MSP432 acts as the master and the EEPROM is a slave.
-//  The EEPROM uses 3 external connections A2 A1 A0 to set the lower 3 bits of
-//  its bus address. This creates a bus address of "1 0 1 0 A2 A1 A0". The code
-//  below assumes those three connections are all connected to VSS (Ground) and
-//  are logic 0. This gives the EEPROM a bus address of 0x50.
-//
-//
-//                                /|\  /|\
-//               MSP432P401      10k  10k     24LC256 EEPROM
-//                 master          |    |          Slave
-//             -----------------   |    |   -----------------
-//            |     P1.6/UCB0SDA|<-|----|->|SDA (5)          |
-//            |                 |  |       |                 |
-//            |                 |  |       |                 |
-//            |     P1.7/UCB0SCL|<-|------>|SCL (6)          |
-//            |                 |          |                 |
-//
-//   Paul Hummel
-//   Cal Poly
-//   May 2017 (created)
-//   Built with CCSv7.1
-//******************************************************************************
 #include "msp.h"
 #include <stdint.h>
 
@@ -241,4 +214,3 @@ uint8_t ReadEEPROM(uint16_t MemAddress)
 }
 
 #endif
-
