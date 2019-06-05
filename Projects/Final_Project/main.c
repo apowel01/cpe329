@@ -108,11 +108,10 @@ void main(void) {
 
     for (i=4000; i > 0; i--)             //Delay for EEPROM write cycle(5ms)
 
-        redvalues = ReadPmod(PMOD_RED_ADDR_LOW);                // Read lower byte red values from Pmod
-    redvalues =
+    redvalues = ReadPmod(PMOD_RED_ADDR_LOW);                // Read lower byte red values from Pmod
 
 
-            bluevalues = ReadPmod(PMOD_BLUE_ADDR_LOW);                // Read blue values from Pmod
+    bluevalues = ReadPmod(PMOD_BLUE_ADDR_LOW);                // Read blue values from Pmod
 
 
     greenvalues = ReadPmod(PMOD_GREEN_ADDR_LOW);               // Read green values from Pmod
@@ -219,7 +218,7 @@ uint16_t ReadPmod(uint16_t RGBAddress) {
 void EUSCIB0_IRQHandler(void) {
 
     if (EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG0) {      // Check if transmit complete
-        EUSCI_B0->IFG &= ~ EUSCI_B_IFG`_TXIFG0;    // Clear interrupt flag
+        EUSCI_B0->IFG &= ~ EUSCI_B_IFG_TXIFG0;    // Clear interrupt flag
         TransmitFlag = 1;                         // Set global flag
     }
 

@@ -1,3 +1,4 @@
+#if 0
 /*
  * color.c
  *
@@ -40,7 +41,7 @@ void InitEEPROM(uint8_t DeviceAddress);
 void WriteEEPROM(uint16_t MemAddress, uint8_t MemByte);
 uint8_t ReadEEPROM(uint16_t MemAddress);
 
-uint16_t TransmitFlag = 0;
+//uint16_t TransmitFlag = 0;
 
 int main(void)
 {
@@ -94,24 +95,59 @@ void InitEEPROM(uint8_t DeviceAddress)
 
     EUSCI_B0->IE |= EUSCI_A_IE_RXIE |         // Enable receive interrupt
             EUSCI_A_IE_TXIE;
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  Function that writes a single byte to the EEPROM.
-//
-//  MemAddress  - 2 byte address specifies the address in the EEPROM memory
-//  MemByte     - 1 byte value that is stored in the EEPROM
-//
-//  Procedure :
-//      start
-//      transmit address+W (control+0)     -> ACK (from EEPROM)
-//      transmit data      (high address)  -> ACK (from EEPROM)
-//      transmit data      (low address)   -> ACK (from EEPROM)
-//      transmit data      (data)          -> ACK (from EEPROM)
-//      stop
+// Function to configure color sensor settings
 //
 ////////////////////////////////////////////////////////////////////////////////
+
+                //init register address Location
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// I2C Interrupt Service Routine
+//
+////////////////////////////////////////////////////////////////////////////////
+void EUSCIB0_IRQHandler(void)
+{
+    if (EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG0)     // Check if transmit complete
+    {
+        EUSCI_B0->IFG &= ~ EUSCI_B_IFG_TXIFG0;  // Clear interrupt flag
+        TransmitFlag = 1;                       // Set global flag
+    }
+
+    if (EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG0)     // Check if receive complete
+    {
+        EUSCI_B0->IFG &= ~ EUSCI_B_IFG_RXIFG0;  // Clear interrupt flag
+        TransmitFlag = 1;                       // Set global flag
+    }
+}
+
 void WriteEEPROM(uint16_t MemAddress, uint8_t MemByte)
 {
     uint8_t HiAddress;
@@ -204,25 +240,5 @@ uint8_t ReadEEPROM(uint16_t MemAddress)
     return ReceiveByte;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// I2C Interrupt Service Routine
-//
-////////////////////////////////////////////////////////////////////////////////
-void EUSCIB0_IRQHandler(void)
-{
-    if (EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG0)     // Check if transmit complete
-    {
-        EUSCI_B0->IFG &= ~ EUSCI_B_IFG_TXIFG0;  // Clear interrupt flag
-        TransmitFlag = 1;                       // Set global flag
-    }
-
-    if (EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG0)     // Check if receive complete
-    {
-        EUSCI_B0->IFG &= ~ EUSCI_B_IFG_RXIFG0;  // Clear interrupt flag
-        TransmitFlag = 1;                       // Set global flag
-    }
-}
-
-
+#endif
 
