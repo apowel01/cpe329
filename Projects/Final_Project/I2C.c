@@ -106,12 +106,13 @@ void i2c_read_bytes(uint8_t *p_values, uint8_t num_values)
 
     i2c_start_rx();
     for (i=0; i < num_values; i++) {
+        if (i == num_values - 1) {
+            i2c_stop();  // set stop for the last read
+        }
         p_values[i] = EUSCI_B0->RXBUF;      // Send the byte to store in EEPROM
 
         i2c_wait_ready();
     }
-
-    i2c_stop();
 }
 
 
@@ -121,7 +122,7 @@ static uint8_t power_on[2] = {0x80, 0x01};
 static uint8_t adc_on[2] = {0x80, 0x02};
 static uint8_t read_base_address[2] = {0xB4, 0x00}; // we only use the first byte
 
-uint8_t InitPmod2(uint8_t Pmod_ADDRESS) {
+uint8_t InitPmod(uint8_t Pmod_ADDRESS) {
     uint8_t ReceiveByte;
     uint8_t read_values[8];
 
@@ -145,7 +146,7 @@ uint8_t InitPmod2(uint8_t Pmod_ADDRESS) {
     return 1;
 }
 
-uint8_t InitPmod(uint8_t Pmod_ADDRESS) {
+uint8_t InitPmod2(uint8_t Pmod_ADDRESS) {
     uint8_t ReceiveByte;
     P1->SEL0 |= BIT6 | BIT7;           // Set I2C pins of eUSCI_B0
 
