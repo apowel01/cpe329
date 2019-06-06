@@ -33,89 +33,38 @@
 #include "timer_a.h"
 #include "delay.h"
 #include "LCD.h"
-
-#define PMOD_ADDRESS 0x29
-#define PMOD_RED_ADDR_LOW 0x00
-#define PMOD_RED_ADDR_HIGH 0x00
-
-#define PMOD_BLUE_ADDR_LOW 0x00
-#define PMOD_BLUE_ADDR_HIGH 0x00
-
-#define PMOD_GREEN_ADDR_LOW 0x00
-#define PMOD_GREEN_ADDR_HIGH 0x00
-
-#define PMOD_CLEAR_ADDR_LOW 0x00
-#define PMOD_CLEAR_ADDR_HIGH 0x00
-
-#define COMMD_BIT 0x80
-
-
-uint8_t InitPmod(uint8_t Pmod_ADDRESS);
-void WritePmod(uint16_t MemAddress, uint8_t MemByte);
-uint16_t ReadPmod(uint16_t MemAddress);
-
-
-
-
+#include "pmod_color.h"
+#include "speech.h"
 
 void main(void) {
-    uint8_t device_ID = 0;
+    pmod_colors_t colors;
+    char * color_name;
+
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
     delay_set_dco(FREQ_3_0_MHz); // set DCO to 3MHz
-    timer_a_init();
+//    timer_a_init(); // why are we doing this?
+    // initialize the color sensor
+    pmod_color_init();
+    // initialize the speakjet text to speech module
+    speech_init();
 
     __enable_irq();
-
-    //////
-
-    uint32_t i;
-    //uint16_t redvalues;
-    //uint16_t bluevalues;
-    //uint16_t greenvalues;
-    //uint16_t clearvalues;
 
 
     P2->DIR |= BIT2 | BIT1 | BIT0;             //Configure LED2
     P2->OUT &= ~(BIT2 | BIT1 | BIT0);
 
-    __enable_irq();                            //enable global interrupts
+    while(1) {
+        delay_sec(5);   // cloud replace this with a button push
 
-    device_ID = InitPmod(PMOD_ADDRESS);
-
-    //       WritePmod(0x1122, 0x21);
-
-    for (i=4000; i > 0; i--)             //Delay for EEPROM write cycle(5ms)
-
-  /*  redvalues = ReadPmod(PMOD_RED_ADDR_LOW);                // Read lower byte red values from Pmod
-
-
-    bluevalues = ReadPmod(PMOD_BLUE_ADDR_LOW);                // Read blue values from Pmod
-
-
-    greenvalues = ReadPmod(PMOD_GREEN_ADDR_LOW);               // Read green values from Pmod
-
-
-    clearvalues = ReadPmod(PMOD_CLEAR_ADDR_LOW);               // Read clear values from Pmod
-
-    P2->OUT |= (redvalues & (BIT2 | BIT1 | BIT0));  // Set LED2 With 3 LSB of Value
-    for (i=4000; i > 0; i--)             //wait before changing LED
-
-        P2->OUT |= (bluevalues & (BIT2 | BIT1 | BIT0));  // Set LED2 With 3 LSB of Value
-    for (i=4000; i > 0; i--)             //Delay for EEPROM write cycle(5ms)
-
-        P2->OUT |= (greenvalues & (BIT2 | BIT1 | BIT0));  // Set LED2 With 3 LSB of Value
-    for (i=4000; i > 0; i--)             //Delay for EEPROM write cycle(5ms)
-
-        P2->OUT |= (clearvalues & (BIT2 | BIT1 | BIT0));  // Set LED2 With 3 LSB of Value
-    for (i=4000; i > 0; i--)             //Delay for EEPROM write cycle(5ms)
-
-        //__sleep();          // go to lower Power mode
-*/
-
-        while(1) {
-
-        }
+        // read colors from the pmod sensor
+        pmod_color_read(&colors);
+        // convert the colors to text
+        color_name = pmod_color_to_name(&colors);
+        // send it to the speech module
+        speech_say(&colors);
+    }
 }
 
 #if 0

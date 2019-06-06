@@ -7,7 +7,7 @@
 
 #include "delay.h"
 #include "msp.h"
-
+#if 0
 #define PULSE_PERIOD 0x0001  // 20 ms : 0xEA60
 #define PULSE_BASE 1475
 #define PULSE_INCREMENT 305
@@ -64,7 +64,7 @@ void timer_a_init(void)
 #endif
 }
 
-
+#endif
 
 
 
