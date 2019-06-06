@@ -8,6 +8,7 @@
 #ifndef I2C_H_
 #define I2C_H_
 
+uint8_t InitPmod(uint8_t Pmod_ADDRESS);
 
 
 

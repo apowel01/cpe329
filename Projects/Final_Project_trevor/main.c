@@ -30,9 +30,10 @@
  *      Author: Andy Hunt
  */
 #include "msp.h"
-#include "timer_a.h"
+//#include "timer_a.h"
 #include "delay.h"
-#include "LCD.h"
+//#include "LCD.h"
+#include "pmod_color.h"
 
 #define PMOD_ADDRESS 0x29
 #define PMOD_RED_ADDR_LOW 0x00
@@ -53,12 +54,116 @@
 uint8_t InitPmod(uint8_t Pmod_ADDRESS);
 void WritePmod(uint16_t MemAddress, uint8_t MemByte);
 uint16_t ReadPmod(uint16_t MemAddress);
+static uint16_t TransmitFlag = 0;
 
+uint8_t InitPmod(uint8_t Pmod_ADDRESS) {
+    uint8_t ReceiveByte;
+    P1->SEL0 |= BIT6 | BIT7;           // Set I2C pins of eUSCI_B0
 
+    // Enable eUSCIB0 interrupt in NVIC module
+    NVIC->ISER[0] = 1 << ((EUSCIB0_IRQn) & 31);
+
+    // Configure USCI_B0 for I2C mode
+    EUSCI_B0->CTLW0 |= EUSCI_A_CTLW0_SWRST; // Software reset enabled
+    EUSCI_B0->CTLW0 = EUSCI_A_CTLW0_SWRST | // Remain eUSCI in reset mode
+            EUSCI_B_CTLW0_MODE_3 |          // I2C mode
+            EUSCI_B_CTLW0_MST |             // Master mode
+            EUSCI_B_CTLW0_SYNC |            // Sync mode
+            EUSCI_B_CTLW0_SSEL__SMCLK;      // SMCLK
+
+    EUSCI_B0->BRW = 30;                     // baudrate = SMCLK / 30 = 100kHz
+    EUSCI_B0->I2CSA = Pmod_ADDRESS;        // Slave address
+    EUSCI_B0->CTLW0 &= ~EUSCI_A_CTLW0_SWRST; // Release eUSCI from reset
+
+    EUSCI_B0->IE |= EUSCI_A_IE_RXIE |       // Enable receive interrupt
+            EUSCI_A_IE_TXIE;
+
+    //Power on Color Sensor
+    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TR;    // Set transmit mode (write)
+    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTT; // I2C start condition
+
+    while (!TransmitFlag);                  // Wait for Pmod address to transmit
+    TransmitFlag = 0;
+    EUSCI_B0 -> TXBUF = 0x29;          // Send Slave Address
+
+    while (!TransmitFlag);                  // Wait for Pmod address to transmit
+    TransmitFlag = 0;
+    EUSCI_B0 -> TXBUF = (COMMD_BIT | 0x00);          // Send Enable Register Address
+
+    while (!TransmitFlag);                   // Wait for the transmit to complete
+    TransmitFlag = 0;
+    EUSCI_B0 -> TXBUF = 0x0B;           //Send data byte to enable PON, RGBC ADC,
+    // set stop bit
+    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTP;
+
+    delay_us(3000); //wait for PON Start up
+    //Check ID Register
+     EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TR;    // Set transmit mode (write)
+     EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTT; // I2C start condition
+
+     while (!TransmitFlag);                  // Wait for Pmod address to transmit
+     TransmitFlag = 0;
+     EUSCI_B0 -> TXBUF = 0x29;          // Send Slave Address
+
+     while (!TransmitFlag);                  // Wait for Pmod address to transmit
+     TransmitFlag = 0;
+     EUSCI_B0 -> TXBUF = (COMMD_BIT | 0x13);          // Send ID Register Address
+
+     while (!TransmitFlag);                   // Wait for the transmit to complete
+
+    EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_TR; // Set receive mode (read)
+    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTT; // I2C start condition (restart)
+    EUSCI_B0 -> TXBUF &= ~COMMD_BIT;          // Send ID Register Address
+
+    // Wait for start to be transmitted
+    while ((EUSCI_B0->CTLW0 & EUSCI_B_CTLW0_TXSTT));
+
+    // set stop bit to trigger after first byte
+    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTP;
+
+    while (!TransmitFlag); // Wait to receive a byte
+    TransmitFlag = 0;
+
+    ReceiveByte = EUSCI_B0->RXBUF; // Read byte from the buffer
+
+    return ReceiveByte;
+}
 
 
 
 void main(void) {
+#if 1
+    pmod_colors_t colors = {0,0,0,0};
+    char *p_color_name;
+
+    WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
+
+    // Initialization sequence
+    delay_set_dco(FREQ_3_0_MHz); // set DCO to 3MHz
+
+    InitPmod(0x29);
+
+    // Initialize the PMOD_COLOR module (note: this depends on i2c)
+    pmod_color_init();
+
+    // Enable the IRQs
+    __enable_irq();
+
+    while(1) {
+        // Wait for a set amount of time, or for a button press
+        delay_sec(5);
+
+        // read the color sensors
+        pmod_color_read(&colors);
+
+        // Use values to derive a color name
+        p_color_name = pmod_color_to_name(&colors);
+
+        // output to a text->speech converter
+
+    }
+
+#else
     uint8_t device_ID = 0;
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
@@ -116,9 +221,10 @@ void main(void) {
         while(1) {
 
         }
+#endif
 }
 
-#if 0
+
 void WritePmod(uint16_t MemAddress, uint8_t MemByte) {
 
 
@@ -147,9 +253,8 @@ void WritePmod(uint16_t MemAddress, uint8_t MemByte) {
     TransmitFlag = 0;
     EUSCI_B0 -> CTLW0 |= EUSCI_B_CTLW0_TXSTP; // I2C stop condition
 }
-#endif
 
-#if 0
+
 uint16_t ReadPmod(uint16_t RGBAddress) {
     uint8_t ReceiveByte;
     uint8_t HiAddress;
@@ -190,6 +295,22 @@ uint16_t ReadPmod(uint16_t RGBAddress) {
 
     return ReceiveByte;
 }
+
+#if 1
+/*
+        / I2C Interrupt Service Routine
+ */
+void EUSCIB0_IRQHandler(void) {
+
+    if (EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG0) {      // Check if transmit complete
+        EUSCI_B0->IFG &= ~ EUSCI_B_IFG_TXIFG0;    // Clear interrupt flag
+        TransmitFlag = 1;                         // Set global flag
+    }
+
+    if (EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG0) {      // Check if receive complete
+        EUSCI_B0->IFG &= ~ EUSCI_B_IFG_RXIFG0;    // Clear interrupt flag
+        TransmitFlag = 1;                         // Set global flag
+    }
+
+}
 #endif
-
-
