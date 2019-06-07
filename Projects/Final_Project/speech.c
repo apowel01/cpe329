@@ -52,8 +52,8 @@ void TA0_0_IRQHandler(void)
 // this is where we set timer a for a pulse that gives us 9600 baud
 static void rcx_init(void)
 {
-    P2->DIR |= BIT0;             //Configure LED2
-    P2->OUT &= ~BIT0;
+    P2->DIR |= BIT0;
+    P2->OUT |= BIT0;
 
     TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
                                             // to use SMCLK in UP mode
