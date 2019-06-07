@@ -11,11 +11,16 @@
 #include "msp.h"
 #include "pmod_color.h"
 
-#define BLUE_PHONEME "\BO \FAST \LO \IHWW"
-#define RED_PHONEME "\RR \SLOW \EH \ED"
-#define GREEN_PHONEME "\Slow \GO \FAST \RR \SLOW \IY \NE"
-#define CLEAR_PHONEME "\SLOW \KO \FAST \LE \IYRR"
-#define BLACK_PHONEME "\DO \AWRR \P4 \EK"
+// The alaphone library for the speakjet uses "\" in front of an alaphone to
+// tell the speakjet how to process it (an escape character).  The compile also sees them as
+// an escape character for special processing, so in the constant we use "\\" to escape the escape
+// character, this means the compiler strips the first "\" and leaves the second one, so we get
+// the correct string for transmission
+#define BLUE_PHONEME "\\BO \\FAST \\LO \\IHWW"
+#define RED_PHONEME "\\RR \\SLOW \\EH \\ED"
+#define GREEN_PHONEME "\\Slow \\GO \\FAST \\RR \\SLOW \\IY \\NE"
+#define CLEAR_PHONEME "\\SLOW \\KO \\FAST \\LE \\IYRR"
+#define BLACK_PHONEME "\\DO \\AWRR \\P4 \\EK"
 
 #define SPEECH_BLUE_THRESHOLD 8192
 #define SPEECH_RED_THRESHOLD 8192
@@ -52,8 +57,8 @@ void TA0_0_IRQHandler(void)
 // this is where we set timer a for a pulse that gives us 9600 baud
 static void rcx_init(void)
 {
-    P2->DIR |= BIT0;
-    P2->OUT |= BIT0;
+    P6->DIR |= BIT0;
+    P6->OUT |= BIT0;
 
     TIMER_A0->CTL |= TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1; // setup timerA
                                             // to use SMCLK in UP mode
