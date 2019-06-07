@@ -11,7 +11,7 @@
 #include "msp.h"
 #include "pmod_color.h"
 
-// The alaphone library for the speakjet uses "\" in front of an alaphone to
+// The allophone library for the speakjet uses "\" in front of an allophone to
 // tell the speakjet how to process it (an escape character).  The compile also sees them as
 // an escape character for special processing, so in the constant we use "\\" to escape the escape
 // character, this means the compiler strips the first "\" and leaves the second one, so we get
@@ -81,74 +81,26 @@ static void rcx_send_string(char * p_string)
         }
         // set the bits in the array
         for (i=0; i<8; i++) {
-            bit_buffer[9-i] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
+            bit_buffer[i+1] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
         }
         p_string++;
         character_sending = 1;
     }
 }
 
-static uint8_t speech_needs_blue(pmod_colors_t * p_colors)
-{
-    uint8_t blue = 0;
-
-    if (p_colors->blue > SPEECH_BLUE_THRESHOLD) {
-        blue = 1;
-    }
-
-    return blue;
-}
-
-static uint8_t speech_needs_red(pmod_colors_t * p_colors)
-{
-    uint8_t red = 0;
-
-    if (p_colors->red > SPEECH_RED_THRESHOLD) {
-        red = 1;
-    }
-
-    return red;
-}
-
-static uint8_t speech_needs_green(pmod_colors_t * p_colors)
-{
-    uint8_t green = 0;
-
-    if (p_colors->green > SPEECH_GREEN_THRESHOLD) {
-        green = 1;
-    }
-
-    return green;
-}
-
-static uint8_t speech_needs_clear(pmod_colors_t * p_colors)
-{
-    uint8_t clear = 0;
-
-    if (p_colors->clear > SPEECH_CLEAR_THRESHOLD) {
-        clear = 1;
-    }
-
-    return clear;
-}
-
-void speech_say(pmod_colors_t * p_colors)
+void speech_say(pmod_result_t * p_results)
 {
     uint8_t color_spoken = 0;
 
-    if (speech_needs_clear(p_colors)) {
-        rcx_send_string(CLEAR_PHONEME);
-        color_spoken = 1;
-    }
-    if (speech_needs_blue(p_colors)) {
+    if (p_results->blue) {
         rcx_send_string(BLUE_PHONEME);
         color_spoken = 1;
     }
-    if (speech_needs_green(p_colors)) {
+    if (p_results->green) {
         rcx_send_string(GREEN_PHONEME);
         color_spoken = 1;
     }
-    if (speech_needs_red(p_colors)) {
+    if (p_results->green) {
         rcx_send_string(RED_PHONEME);
         color_spoken = 1;
     }

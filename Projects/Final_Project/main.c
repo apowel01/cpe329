@@ -64,7 +64,7 @@ void main(void) {
         // convert the colors to text
         color_name = pmod_color_to_name(&colors, &results);
         // send it to the speech module
-        speech_say(&colors);
+        speech_say(&results);
     }
 }
 
