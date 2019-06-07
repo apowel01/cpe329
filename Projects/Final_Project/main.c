@@ -38,6 +38,7 @@
 
 void main(void) {
     pmod_colors_t colors;
+    pmod_result_t results;
     char * color_name;
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
@@ -61,7 +62,7 @@ void main(void) {
         // read colors from the pmod sensor
         pmod_color_read(&colors);
         // convert the colors to text
-        color_name = pmod_color_to_name(&colors);
+        color_name = pmod_color_to_name(&colors, &results);
         // send it to the speech module
         speech_say(&colors);
     }

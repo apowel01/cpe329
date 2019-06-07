@@ -86,18 +86,23 @@ void pmod_color_read(pmod_colors_t *p_colors)
     p_colors->blue |= (uint16_t)read_values[7] << 8;
 }
 
-char * pmod_color_to_name(pmod_colors_t *p_colors)
+
+char * pmod_color_to_name(pmod_colors_t *p_colors, pmod_result_t *p_result)
 {
-    uint8_t blue = 0;
-    uint8_t green = 0;
-    uint8_t red = 0;
-    uint8_t clear = 0;
+    uint32_t threshold;
+    uint32_t blue = (uint32_t)p_colors->blue;
+    uint32_t green = (uint32_t)p_colors->green;
+    uint32_t red = (uint32_t)p_colors->red;
+    uint32_t clear = (uint32_t)p_colors->clear;
 
-    blue = (p_colors->blue > 8192) ? 1 : 0;
-    red = (p_colors->red > 8192) ? 1 : 0;
-    green = (p_colors->green > 8192) ? 1 : 0;
-    clear = (p_colors->clear > 8192) ? 1 : 0;
+    threshold = (clear*30)/100;
 
-    return color_names[clear][red][green][blue];
+
+    p_result->blue = (blue > threshold) ? 1 : 0;
+    p_result->red = (red > threshold) ? 1 : 0;
+    p_result->green = (green > threshold) ? 1 : 0;
+    clear = (clear > 8192) ? 1 : 0;
+
+    return color_names[0][p_result->red][p_result->green][p_result->blue];
 }
 
