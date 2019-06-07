@@ -18,15 +18,13 @@
 // character, this means the compiler strips the first "\" and leaves the second one, so we get
 // the correct string for transmission
 #define BLUE_PHONEME "\\BO \\FAST \\LO \\IHWW"
+//#define BLUE_PHONEME "\BO \FAST \LO \IHWW"
 #define RED_PHONEME "\\RR \\SLOW \\EH \\ED"
+//#define RED_PHONEME "\RR \SLOW \EH \ED"
 #define GREEN_PHONEME "\\Slow \\GO \\FAST \\RR \\SLOW \\IY \\NE"
-#define CLEAR_PHONEME "\\SLOW \\KO \\FAST \\LE \\IYRR"
+//#define GREEN_PHONEME "\\Slow \GO \FAST \RR \SLOW \IY \NE"
 #define BLACK_PHONEME "\\DO \\AWRR \\P4 \\EK"
-
-#define SPEECH_BLUE_THRESHOLD 8192
-#define SPEECH_RED_THRESHOLD 8192
-#define SPEECH_GREEN_THRESHOLD 8192
-#define SPEECH_CLEAR_THRESHOLD 8192
+//#define BLACK_PHONEME "\DO \AWRR \P4 \EK"
 
 static uint8_t bit_buffer[10] = {1,0,0,0,0,0,0,0,0,0}; // defines start and stop conditions - bits 0 and 9
 static uint8_t character_sending = 0;
@@ -82,8 +80,8 @@ static void rcx_send_string(char * p_string)
         }
         // set the bits in the array
         for (i=0; i<8; i++) {
-//            bit_buffer[i+1] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
-            bit_buffer[9-i] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
+            bit_buffer[i+1] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
+//            bit_buffer[9-i] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
         }
         p_string++;
         character_sending = 1;
