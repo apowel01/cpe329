@@ -40,7 +40,7 @@ void pmod_color_init(void)
 }
 
 static uint8_t power_on[2] = {0xA0, 0x01};
-static uint8_t adc_on[2] = {0xA0, 0x02};
+static uint8_t adc_on[2] = {0xA0, 0x03};
 static uint8_t read_base_address[2] = {0xB4, 0x00}; // we only use the first byte
 
 void pmod_color_read(pmod_colors_t *p_colors)

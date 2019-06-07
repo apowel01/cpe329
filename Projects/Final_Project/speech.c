@@ -81,7 +81,7 @@ static void rcx_send_string(char * p_string)
         }
         // set the bits in the array
         for (i=0; i<8; i++) {
-            bit_buffer[i+1] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
+            bit_buffer[9-i] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
         }
         p_string++;
         character_sending = 1;
