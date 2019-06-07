@@ -10,6 +10,7 @@
  */
 #include "msp.h"
 #include "pmod_color.h"
+#include "LCD.h"
 
 // The allophone library for the speakjet uses "\" in front of an allophone to
 // tell the speakjet how to process it (an escape character).  The compile also sees them as
@@ -81,7 +82,8 @@ static void rcx_send_string(char * p_string)
         }
         // set the bits in the array
         for (i=0; i<8; i++) {
-            bit_buffer[i+1] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
+//            bit_buffer[i+1] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
+            bit_buffer[9-i] = ((*p_string & (1 << i)) > 0) ? 1 : 0;
         }
         p_string++;
         character_sending = 1;
@@ -91,22 +93,27 @@ static void rcx_send_string(char * p_string)
 void speech_say(pmod_result_t * p_results)
 {
     uint8_t color_spoken = 0;
+    Clear_LCD();
 
     if (p_results->blue) {
         rcx_send_string(BLUE_PHONEME);
+        Write_string_LCD("Blue ");
         color_spoken = 1;
     }
     if (p_results->green) {
         rcx_send_string(GREEN_PHONEME);
+        Write_string_LCD("Green ");
         color_spoken = 1;
     }
-    if (p_results->green) {
+    if (p_results->red) {
         rcx_send_string(RED_PHONEME);
+        Write_string_LCD("Red ");
         color_spoken = 1;
     }
 
     if (0 == color_spoken) {
         rcx_send_string(BLACK_PHONEME);
+        Write_string_LCD("Dark ");
     }
 }
 

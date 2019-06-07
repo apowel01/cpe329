@@ -49,6 +49,8 @@ void main(void) {
     pmod_color_init();
     // initialize the speakjet text to speech module
     speech_init();
+    // initialize the LCD
+    lcd_init();
 
     __enable_irq();
 

@@ -10,34 +10,25 @@
 #include "I2C.h"
 
 #define PMOD_DEVICE_ADDRESS 0x29
-#define NUM_CLEAR 2  // number of clear shades
 #define NUM_RED 2  // number of red shades
 #define NUM_GREEN 2  // number of green shades
 #define NUM_BLUE 2  // number of blue shades
 
-char * color_names[NUM_CLEAR][NUM_RED][NUM_GREEN][NUM_BLUE];
+char * color_names[NUM_RED][NUM_GREEN][NUM_BLUE];
 
 
 void pmod_color_init(void)
 {
     // initialize the array of names, we can improve on this later
-    color_names[0][0][0][0] = "black";
-    color_names[0][0][0][1] = "blue";
-    color_names[0][0][1][0] = "green";
-    color_names[0][0][1][1] = "blue green";
-    color_names[0][1][0][0] = "red";
-    color_names[0][1][0][1] = "red blue";
-    color_names[0][1][1][0] = "red green";
-    color_names[0][1][1][1] = "red green blue";
-    color_names[1][0][0][0] = "clear";
-    color_names[1][0][0][1] = "clear blue";
-    color_names[1][0][1][0] = "clear green";
-    color_names[1][0][1][1] = "clear blue green";
-    color_names[1][1][0][0] = "clear red";
-    color_names[1][1][0][1] = "clear red blue";
-    color_names[1][1][1][0] = "clear red green";
-    color_names[1][1][1][1] = "clear red green blue";
-}
+    color_names[0][0][0] = "black";
+    color_names[0][0][1] = "blue";
+    color_names[0][1][0] = "green";
+    color_names[0][1][1] = "blue green";
+    color_names[1][0][0] = "red";
+    color_names[1][0][1] = "red blue";
+    color_names[1][1][0] = "red green";
+    color_names[1][1][1] = "red green blue";
+    }
 
 static uint8_t power_on[2] = {0xA0, 0x01};
 static uint8_t adc_on[2] = {0xA0, 0x03};
@@ -96,13 +87,15 @@ char * pmod_color_to_name(pmod_colors_t *p_colors, pmod_result_t *p_result)
     uint32_t clear = (uint32_t)p_colors->clear;
 
     threshold = (clear*30)/100;
-
+    // Pick an aritrary level, below which we
+    if (threshold < 200) {
+        threshold = 200;
+    }
 
     p_result->blue = (blue > threshold) ? 1 : 0;
     p_result->red = (red > threshold) ? 1 : 0;
     p_result->green = (green > threshold) ? 1 : 0;
-    clear = (clear > 8192) ? 1 : 0;
 
-    return color_names[0][p_result->red][p_result->green][p_result->blue];
+    return color_names[p_result->red][p_result->green][p_result->blue];
 }
 
