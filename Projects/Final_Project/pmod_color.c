@@ -91,11 +91,19 @@ char * pmod_color_to_name(pmod_colors_t *p_colors, pmod_result_t *p_result)
     if (threshold < 200) {
         threshold = 200;
     }
+    else if (clear > 1000){
+        threshold = 400;
+    }
 
     p_result->blue = (blue > threshold) ? 1 : 0;
     p_result->red = (red > threshold) ? 1 : 0;
     p_result->green = (green > threshold) ? 1 : 0;
 
+   if ((p_result->blue + p_result->red + p_result->green) > 1){
+       p_result->blue = 0;
+       p_result->red = 0;
+       p_result->green = 0;
+   }
     return color_names[p_result->red][p_result->green][p_result->blue];
 }
 

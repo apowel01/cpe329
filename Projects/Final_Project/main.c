@@ -35,10 +35,12 @@
 #include "LCD.h"
 #include "pmod_color.h"
 #include "speech.h"
+#include "buttons.h"
 
 void main(void) {
     pmod_colors_t colors;
     pmod_result_t results;
+    uint8_t wait;
     char * color_name;
 
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
@@ -51,22 +53,33 @@ void main(void) {
     speech_init();
     // initialize the LCD
     lcd_init();
-
+    // initialize buttons
+    buttons_init();
     __enable_irq();
 
 
-    P2->DIR |= BIT2 | BIT1 | BIT0;             //Configure LED2
+    P2->DIR |= BIT2 | BIT1 | BIT0;             //Configure Pins For output for LCD
     P2->OUT &= ~(BIT2 | BIT1 | BIT0);
 
     while(1) {
-        delay_sec(5);   // cloud replace this with a button push
-
-        // read colors from the pmod sensor
-        pmod_color_read(&colors);
-        // convert the colors to text
-        color_name = pmod_color_to_name(&colors, &results);
-        // send it to the speech module
-        speech_say(&results);
+                // delay_sec(5);   // cloud replace this with a button push
+        wait = buttons_get_push();
+        if (wait == 0)
+        {
+            // read colors from the pmod sensor
+            pmod_color_read(&colors);
+            // convert the colors to text
+            color_name = pmod_color_to_name(&colors, &results);
+            // send it to the speech module
+            speech_say(&results);
+            // delay so not too spammed
+            delay_sec(2);
+        }
+        else
+        {
+            delay_ms(300);
+            Clear_LCD();
+        }
     }
 }
 
