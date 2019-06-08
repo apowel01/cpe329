@@ -87,7 +87,7 @@ char * pmod_color_to_name(pmod_colors_t *p_colors, pmod_result_t *p_result)
     uint32_t clear = (uint32_t)p_colors->clear;
 
     threshold = (clear*30)/100;
-    // Pick an aritrary level, below which we
+    // Pick an arbitrary level, below which we
     if (threshold < 200) {
         threshold = 200;
     }
